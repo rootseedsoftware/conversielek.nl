@@ -39,6 +39,14 @@ import {
   type Screenshot,
 } from '@/lib/claude';
 import { storage } from '@/lib/storage';
+import {
+  saveAudit as persistAudit,
+  loadHistory as fetchHistory,
+  deleteAudit as removeAudit,
+  updateResolved as persistResolved,
+  loadResolved as fetchResolved,
+  type HistoryItem,
+} from '@/lib/audit-store';
 import { flowTypes, type FlowType } from '@/lib/data/flow-types';
 import { productCategories } from '@/lib/data/categories';
 import { severityConfig } from '@/lib/data/severity';
@@ -52,17 +60,6 @@ import { exportAuditAsPdf } from '@/lib/pdf-export';
 type View = 'landing' | 'audit' | 'history' | 'report';
 
 type Toast = { message: string; type: 'success' | 'error' };
-
-type HistoryItem = {
-  key: string;
-  timestamp: number;
-  flowType: FlowType['value'];
-  webshopName: string;
-  webshopUrl?: string;
-  productCategory: string;
-  email?: string | null;
-  audit: AuditResult;
-};
 
 type SeverityFilter = AuditIssue['severity'] | 'all';
 
@@ -145,23 +142,8 @@ export default function App() {
 
   const loadHistory = async () => {
     try {
-      const result = await storage.list('audit:');
-      if (result?.keys && result.keys.length > 0) {
-        const audits: HistoryItem[] = [];
-        for (const key of result.keys) {
-          try {
-            const item = await storage.get(key);
-            if (item?.value) {
-              const parsed = JSON.parse(item.value) as Omit<HistoryItem, 'key'>;
-              audits.push({ key, ...parsed });
-            }
-          } catch {
-            /* skip corrupt entry */
-          }
-        }
-        audits.sort((a, b) => b.timestamp - a.timestamp);
-        setHistory(audits);
-      }
+      const items = await fetchHistory();
+      setHistory(items);
     } catch {
       /* no history yet */
     } finally {
@@ -171,17 +153,14 @@ export default function App() {
 
   const saveAudit = async (auditData: AuditResult) => {
     try {
-      const key = `audit:${Date.now()}`;
-      const toSave = {
-        timestamp: Date.now(),
+      const key = await persistAudit({
         flowType,
         webshopName: webshopName || webshopUrl || 'Onbekende webshop',
         webshopUrl,
         productCategory,
         email: email || null,
         audit: auditData,
-      };
-      await storage.set(key, JSON.stringify(toSave));
+      });
       setCurrentAuditKey(key);
       setResolvedIssues({});
       await loadHistory();
@@ -197,7 +176,7 @@ export default function App() {
     setResolvedIssues(newResolved);
     if (currentAuditKey && currentAuditKey !== 'demo') {
       try {
-        await storage.set(`resolved:${currentAuditKey}`, JSON.stringify(newResolved));
+        await persistResolved(currentAuditKey, newResolved);
       } catch {
         /* silent */
       }
@@ -206,8 +185,7 @@ export default function App() {
 
   const deleteAuditFromHistory = async (key: string) => {
     try {
-      await storage.delete(key);
-      await storage.delete(`resolved:${key}`);
+      await removeAudit(key);
       await loadHistory();
       showToast('Audit verwijderd');
     } catch {
@@ -803,9 +781,8 @@ export default function App() {
                           setFlowType(item.flowType);
                           setWebshopName(item.webshopName);
                           try {
-                            const resolved = await storage.get(`resolved:${item.key}`);
-                            if (resolved?.value) setResolvedIssues(JSON.parse(resolved.value));
-                            else setResolvedIssues({});
+                            const resolved = await fetchResolved(item.key);
+                            setResolvedIssues(resolved);
                           } catch {
                             setResolvedIssues({});
                           }
