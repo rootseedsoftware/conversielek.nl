@@ -18,6 +18,11 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'nodejs';
 
+// Vercel function timeout. Default Hobby = 10s, Pro = 15s — een Claude
+// vision-call met 1-5 screenshots duurt typisch 15-40s. Op Hobby is 60s
+// het hard maximum; op Pro tot 300s. 60s is veilig voor beide.
+export const maxDuration = 60;
+
 // ---- Config ----------------------------------------------------------------
 
 const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
