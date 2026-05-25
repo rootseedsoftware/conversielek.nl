@@ -9,6 +9,16 @@ import { createClient } from '@/lib/supabase/server';
 import { signOut } from '@/app/auth/actions';
 
 export default async function AuthBar() {
+  // Defensive: als Supabase env vars ontbreken, render alleen de "uit"-state
+  // zonder Supabase aan te roepen. Voorkomt 500 op de hele pagina als
+  // env vars (nog) niet in Vercel staan.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
