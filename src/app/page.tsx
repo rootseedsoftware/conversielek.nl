@@ -54,6 +54,7 @@ import { faqs } from '@/lib/data/faqs';
 import { sampleAudit } from '@/lib/data/sample-audit';
 import { buildAuditPrompt } from '@/lib/prompt';
 import { exportAuditAsPdf } from '@/lib/pdf-export';
+import { compressScreenshot } from '@/lib/image-compress';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -208,28 +209,28 @@ export default function App() {
         setError('Alleen afbeeldingen.');
         continue;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        setError(`${file.name} is groter dan 5MB.`);
+      // Raw input mag tot 15 MB — daarna wordt 't browser-side gecomprimeerd
+      // naar JPEG ~900 KB voordat 't naar de server gaat (Vercel Hobby
+      // heeft een 4.5 MB body-limit). Geen waarschuwing voor de user.
+      if (file.size > 15 * 1024 * 1024) {
+        setError(`${file.name} is groter dan 15MB.`);
         continue;
       }
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(',')[1]);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      newScreenshots.push({
-        name: file.name,
-        type: file.type,
-        base64,
-        preview: `data:${file.type};base64,${base64}`,
-      });
+      try {
+        const compressed = await compressScreenshot(file);
+        newScreenshots.push({
+          name: file.name,
+          type: compressed.type,
+          base64: compressed.base64,
+          preview: `data:${compressed.type};base64,${compressed.base64}`,
+        });
+      } catch (e) {
+        console.error('Compressie mislukt:', e);
+        setError(`${file.name}: comprimeren mislukt. Probeer een ander bestand.`);
+      }
     }
     setScreenshots([...screenshots, ...newScreenshots]);
-    setError('');
+    if (newScreenshots.length > 0) setError('');
   };
 
   const removeScreenshot = (index: number) =>
