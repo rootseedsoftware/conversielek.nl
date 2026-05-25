@@ -27,7 +27,10 @@ export const maxDuration = 60;
 
 const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
 const RATE_LIMIT_PER_MIN = Number(process.env.RATE_LIMIT_PER_MIN ?? 10);
-const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
+// Anthropic model. Override via env voor snelle wissel zonder code-deploy
+// (bv. naar claude-opus-4-1 voor diepere audits, of naar oudere sonnet
+// als nieuwe te duur blijkt). Default: de huidige Sonnet 4.5 alias.
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5';
 const ANTHROPIC_MAX_TOKENS = 8000;
 
 // ---- Origin whitelist ------------------------------------------------------
@@ -244,6 +247,15 @@ export async function POST(req: NextRequest) {
 
       if (status === 401 || status === 403) {
         return Response.json({ error: 'API-key ongeldig.' }, { status: 401, headers: cors });
+      }
+      if (status === 404 && /model/i.test(message)) {
+        return Response.json(
+          {
+            error:
+              'Het geconfigureerde AI-model bestaat niet meer. Beheerder moet ANTHROPIC_MODEL bijwerken.',
+          },
+          { status: 502, headers: cors }
+        );
       }
       if (status === 429) {
         return Response.json(
