@@ -181,6 +181,83 @@ export async function updateResolved(
   await storage.set(`resolved:${key}`, JSON.stringify(resolvedIssues));
 }
 
+// ---- Migration helpers (lokale audits → Supabase) -------------------------
+
+/** Aantal audits dat momenteel alleen in localStorage staat. */
+export async function getLocalAuditsCount(): Promise<number> {
+  const result = await storage.list('audit:');
+  return result?.keys?.length ?? 0;
+}
+
+/**
+ * Migreert alle localStorage-audits naar Supabase voor de ingelogde user.
+ * Op succes per item: verwijder uit localStorage zodat dubbele migratie
+ * onmogelijk is. Retourneert tellingen voor user-feedback.
+ */
+export async function migrateLocalAuditsToSupabase(): Promise<{
+  migrated: number;
+  failed: number;
+}> {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error('Niet ingelogd — kan niet migreren.');
+  }
+
+  const supabase = createClient();
+  const list = await storage.list('audit:');
+  if (!list?.keys || list.keys.length === 0) {
+    return { migrated: 0, failed: 0 };
+  }
+
+  let migrated = 0;
+  let failed = 0;
+
+  for (const key of list.keys) {
+    try {
+      const item = await storage.get(key);
+      if (!item?.value) {
+        failed++;
+        continue;
+      }
+      const parsed = JSON.parse(item.value) as Omit<HistoryItem, 'key'>;
+
+      // Probeer ook bijbehorende resolved-state mee te nemen
+      let resolved: Record<number, boolean> = {};
+      try {
+        const r = await storage.get(`resolved:${key}`);
+        if (r?.value) resolved = JSON.parse(r.value);
+      } catch {
+        /* geen resolved-state — OK */
+      }
+
+      const { error } = await supabase.from('audits').insert({
+        user_id: userId,
+        flow_type: parsed.flowType,
+        webshop_name: parsed.webshopName,
+        webshop_url: parsed.webshopUrl || null,
+        product_category: parsed.productCategory,
+        email: parsed.email ?? null,
+        audit: parsed.audit,
+        resolved_issues: resolved,
+      });
+
+      if (error) {
+        console.error('Migratie-insert mislukt:', error);
+        failed++;
+      } else {
+        await storage.delete(key);
+        await storage.delete(`resolved:${key}`);
+        migrated++;
+      }
+    } catch (e) {
+      console.error('Migratie-loop fout:', e);
+      failed++;
+    }
+  }
+
+  return { migrated, failed };
+}
+
 // ---- loadResolved ----------------------------------------------------------
 
 export async function loadResolved(

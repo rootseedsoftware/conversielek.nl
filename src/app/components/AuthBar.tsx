@@ -29,10 +29,12 @@ export default async function AuthBar() {
       <div className="max-w-6xl mx-auto px-6 py-2 flex items-center justify-end gap-3 text-slate-600">
         {user ? (
           <>
-            <span>
-              Ingelogd als{' '}
-              <span className="font-medium text-slate-900">{user.email}</span>
-            </span>
+            <Link href="/account" className="hover:text-slate-900 transition">
+              <span className="text-slate-500">Ingelogd als</span>{' '}
+              <span className="font-medium text-slate-900 underline decoration-slate-300 decoration-dotted underline-offset-2">
+                {user.email}
+              </span>
+            </Link>
             <span className="text-slate-300">·</span>
             <form action={signOut}>
               <button

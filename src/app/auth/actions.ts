@@ -72,3 +72,25 @@ export async function signOut() {
   revalidatePath('/', 'layout');
   redirect('/');
 }
+
+export async function changePassword(formData: FormData) {
+  const password = String(formData.get('password') ?? '');
+  const confirm = String(formData.get('confirm') ?? '');
+
+  if (!password || password.length < 8) {
+    redirect('/account' + errorParam('Wachtwoord moet minimaal 8 karakters zijn.'));
+  }
+  if (password !== confirm) {
+    redirect('/account' + errorParam('Wachtwoorden komen niet overeen.'));
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    redirect('/account' + errorParam(`Wijzigen mislukt: ${error.message}`));
+  }
+
+  revalidatePath('/account');
+  redirect('/account?success=Wachtwoord+gewijzigd');
+}
