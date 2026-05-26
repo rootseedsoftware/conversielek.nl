@@ -11,7 +11,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Sla alle statische assets en images over — alleen page/route requests
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Sla over: static assets, images, en /api routes. API-routes handelen
+    // hun eigen auth via createClient() in de route — geen session-refresh
+    // overhead per call (was oorzaak van 504 timeouts op /api/audit waar
+    // de middleware tegen Supabase hing).
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
