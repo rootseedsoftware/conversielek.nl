@@ -1,35 +1,40 @@
-// POST /api/audit
+// POST /api/audit  —  streamt Anthropic-respons via Server-Sent Events.
 //
-// Proxy naar de Anthropic API zodat de API-key serverside blijft.
-// Bouwt zelf de Anthropic-payload uit { prompt, screenshots } zodat de
-// client niets van het Anthropic-formaat hoeft te weten.
+// Waarom streaming + Edge runtime:
+// Een Sonnet-vision call op 1-5 screenshots duurt typisch 30-90 seconden.
+// Op Vercel Hobby Node runtime is dat over de 60s maxDuration → de
+// function wordt gekilled → client krijgt 504. Op Edge runtime mag een
+// streaming response veel langer doorlopen (zo lang er data blijft komen
+// is de function "actief"), waardoor Sonnet wél past binnen de Hobby
+// limieten. Bijkomend voordeel: client kan tekst-deltas tonen voor
+// betere UX dan een 60s spinner.
 //
-// Hardening (uit de P0-lijst van de oude server.js review):
-//  - Origin-whitelist via ALLOWED_ORIGINS env (comma-separated)
-//  - Body size cap (~25 MB voor 5 screenshots)
-//  - In-memory rate limit per IP (dev-bruikbaar; voor productie op Vercel
-//    later vervangen door Upstash Redis — comment in code)
-//  - JSON-parse vangnet met repair (strip markdown fences, slice tussen
-//    eerste/laatste accolade)
-//  - max_tokens 8000 (was 4000 — was te krap voor 5 screenshots + 8 issues)
+// Events naar de client (SSE):
+//   event: start  — bevestiging dat we Anthropic gaan aanroepen
+//   event: delta  — { text: "..." } — incrementele tekst-deltas
+//   event: done   — finale AuditResult JSON
+//   event: error  — { code, message } — typed errors voor de client
+//
+// Hardening hieronder is gelijk aan de pre-streaming versie:
+//  - Origin-whitelist via ALLOWED_ORIGINS env
+//  - Body size cap (25 MB)
+//  - In-memory rate limit per IP (best-effort op Edge — module-globals
+//    leven niet betrouwbaar tussen invocations; voor echte rate limit
+//    later @upstash/ratelimit, tracked in M3)
+//  - JSON-repair vangnet (strip code fences, slice eerste/laatste accolade)
 //  - Specifieke statuscodes per faalmodus
 
 import { NextRequest } from 'next/server';
 
-export const runtime = 'nodejs';
-
-// Vercel function timeout. Default Hobby = 10s, Pro = 15s — een Claude
-// vision-call met 1-5 screenshots duurt typisch 15-40s. Op Hobby is 60s
-// het hard maximum; op Pro tot 300s. 60s is veilig voor beide.
-export const maxDuration = 60;
+export const runtime = 'edge';
 
 // ---- Config ----------------------------------------------------------------
 
 const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
 const RATE_LIMIT_PER_MIN = Number(process.env.RATE_LIMIT_PER_MIN ?? 10);
 // Anthropic model. Override via env voor snelle wissel zonder code-deploy
-// (bv. naar claude-opus-4-1 voor diepere audits, of naar oudere sonnet
-// als nieuwe te duur blijkt). Default: de huidige Sonnet 4.5 alias.
+// (bv. claude-haiku-4-5 voor snelheid/kosten, of claude-opus-4-1 voor
+// max kwaliteit). Default: huidige Sonnet 4.5 alias.
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5';
 const ANTHROPIC_MAX_TOKENS = 8000;
 
@@ -41,7 +46,6 @@ function allowedOrigins(): string[] {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
-  // Dev-fallback: als niets is gezet, sta localhost toe.
   if (list.length === 0) {
     return ['http://localhost:3000', 'http://127.0.0.1:3000'];
   }
@@ -59,12 +63,7 @@ function corsHeaders(origin: string | null): Record<string, string> {
   };
 }
 
-// ---- Rate limit (in-memory) ------------------------------------------------
-//
-// LET OP: in-memory state werkt alleen op een single Node-instance. Op
-// Vercel serverless wordt elke functie-invocatie geïsoleerd → deze limiter
-// faalt zachtjes (laat alles door). Voor productie: vervangen door
-// @upstash/ratelimit met Redis. Tracked als follow-up in M3.
+// ---- Rate limit (best-effort op Edge) --------------------------------------
 
 type Bucket = { count: number; resetAt: number };
 const buckets = new Map<string, Bucket>();
@@ -90,6 +89,8 @@ function clientIp(req: NextRequest): string {
 }
 
 // ---- Body reading met size cap --------------------------------------------
+
+class BodyTooLarge extends Error {}
 
 async function readBodyWithCap(req: NextRequest): Promise<string> {
   const lengthHeader = req.headers.get('content-length');
@@ -125,12 +126,7 @@ async function readBodyWithCap(req: NextRequest): Promise<string> {
   return new TextDecoder().decode(buf);
 }
 
-class BodyTooLarge extends Error {}
-
 // ---- JSON repair voor model-output ----------------------------------------
-//
-// Het model wrapt soms toch in markdown fences of voegt afsluitende tekst
-// toe. We pellen die af en pakken vervolgens de eerste t/m laatste {…}.
 
 function repairJson(raw: string): string {
   let s = raw.trim();
@@ -143,14 +139,23 @@ function repairJson(raw: string): string {
   return s;
 }
 
-// ---- Anthropic types (minimaal wat we gebruiken) --------------------------
+// ---- Types ----------------------------------------------------------------
 
 type Screenshot = { name: string; type: string; base64: string };
 
-type AnthropicResponse = {
-  content?: Array<{ type: string; text?: string }>;
-  error?: { type: string; message: string };
+type AnthropicStreamEvent = {
+  type: string;
+  delta?: { type?: string; text?: string };
+  message?: { stop_reason?: string };
 };
+
+// ---- SSE helper -----------------------------------------------------------
+
+const encoder = new TextEncoder();
+
+function sseEvent(event: string, data: unknown): Uint8Array {
+  return encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+}
 
 // ---- Handlers -------------------------------------------------------------
 
@@ -162,7 +167,7 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get('origin');
   const cors = corsHeaders(origin);
 
-  // 1. API-key check (fail fast voor de operator, niet voor de eindgebruiker)
+  // 1. API-key check
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return Response.json(
@@ -180,7 +185,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 3. Body lezen met size cap
+  // 3. Body lezen
   let bodyText: string;
   try {
     bodyText = await readBodyWithCap(req);
@@ -194,7 +199,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Body lezen mislukt.' }, { status: 400, headers: cors });
   }
 
-  // 4. Body parsen
+  // 4. Parsen
   let payload: { prompt?: string; screenshots?: Screenshot[] };
   try {
     payload = JSON.parse(bodyText);
@@ -208,7 +213,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Veld "prompt" ontbreekt.' }, { status: 400, headers: cors });
   }
 
-  // 5. Anthropic-messages opbouwen (screenshots eerst, dan prompt-tekst)
+  // 5. Anthropic-messages opbouwen
   const messageContent: Array<
     | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
     | { type: 'text'; text: string }
@@ -220,104 +225,154 @@ export async function POST(req: NextRequest) {
     { type: 'text', text: prompt },
   ];
 
-  // 6. Call Anthropic
-  let anthropic: AnthropicResponse;
-  try {
-    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: ANTHROPIC_MAX_TOKENS,
-        messages: [{ role: 'user', content: messageContent }],
-      }),
-    });
+  // 6. Stream-respons opbouwen
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) => {
+        controller.enqueue(sseEvent(event, data));
+      };
+      const fail = (code: string, message: string) => {
+        send('error', { code, message });
+        controller.close();
+      };
 
-    anthropic = (await upstream.json()) as AnthropicResponse;
+      try {
+        // Eerste event: bevestig dat we leven. Houdt verbinding warm
+        // voor de client en geeft Vercel een signaal van activiteit.
+        send('start', { ok: true });
 
-    if (!upstream.ok) {
-      // Map Anthropic status door naar zinvolle code voor de client
-      const status = upstream.status;
-      const message = anthropic.error?.message ?? 'Onbekende Anthropic-fout.';
-      console.error(`[audit] Anthropic ${status}: ${message}`);
-
-      if (status === 401 || status === 403) {
-        return Response.json({ error: 'API-key ongeldig.' }, { status: 401, headers: cors });
-      }
-      if (status === 404 && /model/i.test(message)) {
-        return Response.json(
-          {
-            error:
-              'Het geconfigureerde AI-model bestaat niet meer. Beheerder moet ANTHROPIC_MODEL bijwerken.',
+        // Anthropic met stream:true aanroepen
+        const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
           },
-          { status: 502, headers: cors }
-        );
+          body: JSON.stringify({
+            model: ANTHROPIC_MODEL,
+            max_tokens: ANTHROPIC_MAX_TOKENS,
+            stream: true,
+            messages: [{ role: 'user', content: messageContent }],
+          }),
+        });
+
+        if (!upstream.ok) {
+          let errMessage = `Anthropic HTTP ${upstream.status}`;
+          try {
+            const errData = (await upstream.json()) as {
+              error?: { message?: string };
+            };
+            errMessage = errData.error?.message ?? errMessage;
+          } catch {
+            /* response wasn't JSON */
+          }
+          console.error(`[audit] Anthropic ${upstream.status}: ${errMessage}`);
+
+          if (upstream.status === 401 || upstream.status === 403) {
+            return fail('auth', 'API-key ongeldig.');
+          }
+          if (upstream.status === 404 && /model/i.test(errMessage)) {
+            return fail(
+              'server',
+              'Het geconfigureerde AI-model bestaat niet meer. Beheerder moet ANTHROPIC_MODEL bijwerken.'
+            );
+          }
+          if (upstream.status === 429) {
+            return fail('rate_limit', 'Anthropic rate-limit bereikt. Probeer over een minuut opnieuw.');
+          }
+          if (upstream.status === 402 || /credit/i.test(errMessage)) {
+            return fail('quota', 'Anthropic-budget op. Beheerder moet credit bijladen.');
+          }
+          return fail('server', errMessage);
+        }
+
+        if (!upstream.body) {
+          return fail('server', 'Anthropic gaf geen stream terug.');
+        }
+
+        // 7. Anthropic SSE stream lezen, tekst-deltas verzamelen + forwarden
+        const reader = upstream.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const dataStr = line.slice(6).trim();
+            if (!dataStr || dataStr === '[DONE]') continue;
+
+            try {
+              const evt = JSON.parse(dataStr) as AnthropicStreamEvent;
+              if (
+                evt.type === 'content_block_delta' &&
+                evt.delta?.type === 'text_delta' &&
+                typeof evt.delta.text === 'string'
+              ) {
+                const text = evt.delta.text;
+                fullText += text;
+                send('delta', { text });
+              }
+            } catch {
+              // Skip malformed SSE event
+            }
+          }
+        }
+
+        // 8. Volledige tekst parsen naar AuditResult
+        if (!fullText.trim()) {
+          return fail(
+            'parse',
+            'Model gaf een leeg antwoord. Probeer opnieuw met andere screenshots.'
+          );
+        }
+
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(repairJson(fullText));
+        } catch {
+          console.error('[audit] JSON parse fail. Raw output (first 500 chars):', fullText.slice(0, 500));
+          return fail(
+            'parse',
+            'De AI gaf een onverwacht antwoord (geen geldige JSON). Probeer opnieuw of upload kleinere screenshots.'
+          );
+        }
+
+        if (
+          !parsed ||
+          typeof parsed !== 'object' ||
+          typeof (parsed as { overall_score?: unknown }).overall_score !== 'number'
+        ) {
+          return fail('parse', 'Audit-resultaat heeft onverwachte vorm. Probeer opnieuw.');
+        }
+
+        // 9. Klaar — finale event met parsed audit
+        send('done', parsed);
+        controller.close();
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.error('[audit] stream error:', message);
+        fail('network', 'Kan Anthropic niet bereiken. Probeer opnieuw.');
       }
-      if (status === 429) {
-        return Response.json(
-          { error: 'Anthropic rate-limit bereikt. Probeer over een minuut opnieuw.' },
-          { status: 429, headers: cors }
-        );
-      }
-      if (status === 402 || /credit/i.test(message)) {
-        return Response.json(
-          { error: 'Anthropic-budget op. Beheerder moet credit bijladen.' },
-          { status: 402, headers: cors }
-        );
-      }
-      return Response.json({ error: message }, { status: 502, headers: cors });
-    }
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    console.error('[audit] fetch failed:', message);
-    return Response.json(
-      { error: 'Kan Anthropic niet bereiken. Probeer opnieuw.' },
-      { status: 502, headers: cors }
-    );
-  }
+    },
+  });
 
-  // 7. Tekst-blokken samenvoegen en JSON repairen
-  const text = (anthropic.content ?? [])
-    .filter((b) => b.type === 'text' && typeof b.text === 'string')
-    .map((b) => b.text as string)
-    .join('\n');
-
-  if (!text.trim()) {
-    return Response.json(
-      { error: 'Model gaf een leeg antwoord. Probeer opnieuw met andere screenshots.' },
-      { status: 502, headers: cors }
-    );
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(repairJson(text));
-  } catch {
-    console.error('[audit] JSON parse fail. Raw output (first 500 chars):', text.slice(0, 500));
-    return Response.json(
-      {
-        error:
-          'De AI gaf een onverwacht antwoord (geen geldige JSON). Probeer opnieuw of upload kleinere screenshots.',
-      },
-      { status: 502, headers: cors }
-    );
-  }
-
-  // 8. Basale shape-check zodat de client niet crasht op missende velden
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    typeof (parsed as { overall_score?: unknown }).overall_score !== 'number'
-  ) {
-    return Response.json(
-      { error: 'Audit-resultaat heeft onverwachte vorm. Probeer opnieuw.' },
-      { status: 502, headers: cors }
-    );
-  }
-
-  return Response.json(parsed, { status: 200, headers: cors });
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      ...cors,
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 }

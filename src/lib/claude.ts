@@ -139,14 +139,37 @@ export class AuditFailure extends Error {
   }
 }
 
+// SSE event-codes die de server (route.ts) verstuurt
+type ServerEvent =
+  | { event: 'start'; data: { ok: boolean } }
+  | { event: 'delta'; data: { text: string } }
+  | { event: 'done'; data: AuditResult }
+  | { event: 'error'; data: { code: AuditError['kind']; message: string } };
+
+/**
+ * Optionele callback voor live tekst-deltas tijdens streaming.
+ * Krijgt elke text-chunk binnen die Anthropic streamt. Handig voor
+ * progress-UI ("Schrijft sterke punten…"). De caller hoeft niets te
+ * doen — de delta's zijn cosmetisch, het finale resultaat komt
+ * sowieso als return-value van runAudit().
+ */
+export type DeltaHandler = (chunk: string) => void;
+
 /**
  * Roept de audit aan. In demo-mode geeft het mock-data terug zonder
- * netwerkverkeer. In live-mode POST naar /api/audit (Next route handler)
- * die op zijn beurt naar api.anthropic.com proxyt en de key veilig houdt.
+ * netwerkverkeer. In live-mode POST naar /api/audit dat als Server-Sent
+ * Events streamt (zie route.ts). Deze functie consumeert de stream,
+ * roept onDelta() aan bij elke text-delta, en returnt het finale
+ * AuditResult zodra het 'done' event binnen is.
+ *
+ * Streaming voorkomt Vercel function-timeouts: Sonnet kan rustig
+ * 30-90s nadenken terwijl de SSE-verbinding warm blijft.
  */
-export async function runAudit(req: AuditRequest): Promise<AuditResult> {
+export async function runAudit(
+  req: AuditRequest,
+  onDelta?: DeltaHandler
+): Promise<AuditResult> {
   if (isDemoMode()) {
-    // Simuleer een korte vertraging zodat het natuurlijk voelt
     await new Promise((resolve) => setTimeout(resolve, 1200));
     return mockAudit;
   }
@@ -166,42 +189,120 @@ export async function runAudit(req: AuditRequest): Promise<AuditResult> {
     });
   }
 
-  // Map HTTP-status naar gebruikersvriendelijke errors (P1.2)
+  // Pre-stream fouten (rate limit, body cap, ontbrekende key) komen nog
+  // als gewone JSON-response met non-2xx status terug — niet als SSE.
   if (!response.ok) {
     const status = response.status;
+    let serverMsg = '';
+    try {
+      const data = (await response.json()) as { error?: string };
+      serverMsg = data.error ?? '';
+    } catch {
+      /* response had geen JSON body */
+    }
 
     if (status === 401 || status === 403) {
       throw new AuditFailure({
         kind: 'auth',
         message:
+          serverMsg ||
           'API-key ontbreekt of is ongeldig. Beheerder moet ANTHROPIC_API_KEY controleren.',
       });
     }
     if (status === 429) {
       throw new AuditFailure({
         kind: 'rate_limit',
-        message:
-          'Te veel audits in korte tijd. Wacht een minuut en probeer opnieuw.',
+        message: serverMsg || 'Te veel audits in korte tijd. Wacht een minuut en probeer opnieuw.',
       });
     }
     if (status === 402) {
       throw new AuditFailure({
         kind: 'quota',
         message:
+          serverMsg ||
           'Anthropic-budget is op. Beheerder moet credit bijladen op console.anthropic.com.',
+      });
+    }
+    if (status === 413) {
+      throw new AuditFailure({
+        kind: 'server',
+        message: serverMsg || 'Verzoek te groot. Upload kleinere screenshots.',
+        status,
       });
     }
     throw new AuditFailure({
       kind: 'server',
-      message: `Server-fout (HTTP ${status}). Probeer opnieuw of neem contact op met support.`,
+      message:
+        serverMsg ||
+        `Server-fout (HTTP ${status}). Probeer opnieuw of neem contact op met support.`,
       status,
     });
   }
 
-  // Server geeft al JSON met audit-resultaat terug
-  const data = await response.json();
-  if (data && typeof data === 'object' && 'overall_score' in data) {
-    return data as AuditResult;
+  // 2xx: streaming response (text/event-stream). Lees + parse SSE.
+  if (!response.body) {
+    throw new AuditFailure({
+      kind: 'network',
+      message: 'Server gaf een lege response. Probeer opnieuw.',
+    });
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let finalResult: AuditResult | null = null;
+  let errorPayload: { code: AuditError['kind']; message: string } | null = null;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // SSE events zijn gescheiden door blank line (\n\n)
+    const events = buffer.split('\n\n');
+    buffer = events.pop() ?? '';
+
+    for (const rawEvent of events) {
+      if (!rawEvent.trim()) continue;
+
+      let eventType = 'message';
+      let dataStr = '';
+      for (const line of rawEvent.split('\n')) {
+        if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+        else if (line.startsWith('data: ')) dataStr += line.slice(6);
+      }
+      if (!dataStr) continue;
+
+      let parsed: ServerEvent['data'];
+      try {
+        parsed = JSON.parse(dataStr);
+      } catch {
+        continue;
+      }
+
+      if (eventType === 'delta' && onDelta) {
+        const text = (parsed as { text?: string }).text;
+        if (typeof text === 'string') onDelta(text);
+      } else if (eventType === 'done') {
+        finalResult = parsed as AuditResult;
+      } else if (eventType === 'error') {
+        errorPayload = parsed as { code: AuditError['kind']; message: string };
+      }
+      // 'start' event negeren we — bevestiging dat server alive is
+    }
+  }
+
+  if (errorPayload) {
+    // Server stuurt typed errors via SSE
+    throw new AuditFailure({
+      kind: errorPayload.code,
+      message: errorPayload.message,
+    } as AuditError);
+  }
+
+  if (finalResult && typeof finalResult.overall_score === 'number') {
+    return finalResult;
   }
 
   throw new AuditFailure({
