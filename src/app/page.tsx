@@ -55,6 +55,7 @@ import { sampleAudit } from '@/lib/data/sample-audit';
 import { buildAuditPrompt } from '@/lib/prompt';
 import { exportAuditAsPdf } from '@/lib/pdf-export';
 import { compressScreenshot } from '@/lib/image-compress';
+import { company } from '@/lib/data/company';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -652,6 +653,143 @@ export default function App() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section className="bg-slate-50 py-20 border-y border-slate-100">
+          <div className="max-w-5xl mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+              Eerlijke prijzen
+            </h2>
+            <p className="text-center text-slate-600 mb-2">
+              Start gratis, upgrade als het waarde oplevert
+            </p>
+            <p className="text-center text-sm text-orange-700 mb-12 font-medium">
+              🚀 Early access — betaalde tiers zijn binnenkort live
+            </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Probeer */}
+              <div className="relative p-8 rounded-2xl border-2 border-slate-200 bg-white flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">Probeer</h3>
+                  <p className="text-sm text-slate-500 mt-1">Test het uit</p>
+                </div>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-slate-900">€0</span>
+                  <span className="text-slate-500 text-sm ml-1">altijd</span>
+                </div>
+                <button
+                  onClick={() => setView('audit')}
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 hover:bg-slate-200 text-slate-900"
+                >
+                  Start gratis audit
+                </button>
+                <ul className="space-y-2.5 mt-auto">
+                  {[
+                    'Geen account vereist',
+                    'Alle 5 flow-types',
+                    'Audits in deze browser bewaard',
+                    'Basis PDF-rapport',
+                    'Issue progress tracking',
+                  ].map((feat) => (
+                    <li
+                      key={feat}
+                      className="flex items-start gap-2 text-sm text-slate-700"
+                    >
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Webshop (highlighted) */}
+              <div className="relative p-8 rounded-2xl border-2 border-orange-500 shadow-xl shadow-orange-100 bg-white flex flex-col">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  Aanbevolen
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">Webshop</h3>
+                  <p className="text-sm text-slate-500 mt-1">Voor één webshop</p>
+                </div>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-slate-900">€19</span>
+                  <span className="text-slate-500 text-sm ml-1">/maand</span>
+                </div>
+                <a
+                  href={`mailto:${company.email.general}?subject=${encodeURIComponent(
+                    'Early access — Webshop-tier'
+                  )}`}
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-orange-500 hover:bg-orange-600 text-white text-center"
+                >
+                  Vraag early access
+                </a>
+                <ul className="space-y-2.5 mt-auto">
+                  {[
+                    'Account met audits in de cloud',
+                    'Audits beschikbaar op alle apparaten',
+                    'Onbeperkt aantal audits',
+                    'Issue progress tracking',
+                    'Voorrang support',
+                    'Branded PDF-rapport (binnenkort)',
+                    'Voor/na vergelijking (binnenkort)',
+                    'E-mail rapporten (binnenkort)',
+                  ].map((feat) => (
+                    <li
+                      key={feat}
+                      className="flex items-start gap-2 text-sm text-slate-700"
+                    >
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Agency */}
+              <div className="relative p-8 rounded-2xl border-2 border-slate-200 bg-white flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">Agency</h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Voor freelance UX&apos;ers + bureaus
+                  </p>
+                </div>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-slate-900">€59</span>
+                  <span className="text-slate-500 text-sm ml-1">/maand</span>
+                </div>
+                <a
+                  href={`mailto:${company.email.general}?subject=${encodeURIComponent(
+                    'Wachtlijst — Agency-tier'
+                  )}`}
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 hover:bg-slate-200 text-slate-900 text-center"
+                >
+                  Word genotificeerd
+                </a>
+                <ul className="space-y-2.5 mt-auto">
+                  {[
+                    'Alles van Webshop',
+                    'Onbeperkt webshops',
+                    'White-label rapporten',
+                    'Eigen logo + huisstijl',
+                    'Multi-tenant workspaces',
+                    'API access',
+                  ].map((feat) => (
+                    <li
+                      key={feat}
+                      className="flex items-start gap-2 text-sm text-slate-700"
+                    >
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <p className="text-center text-xs text-slate-500 mt-8">
+              Alle prijzen excl. BTW. Maandelijks opzegbaar. Geen verborgen kosten.
+            </p>
           </div>
         </section>
 
