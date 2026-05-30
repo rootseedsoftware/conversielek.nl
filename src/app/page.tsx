@@ -55,7 +55,7 @@ import { sampleAudit } from '@/lib/data/sample-audit';
 import { buildAuditPrompt } from '@/lib/prompt';
 import { exportAuditAsPdf } from '@/lib/pdf-export';
 import { compressScreenshot } from '@/lib/image-compress';
-import { company } from '@/lib/data/company';
+import { getQuotaInfo, type QuotaInfo } from '@/lib/billing-actions';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -117,6 +117,8 @@ export default function App() {
   const [auditCounter, setAuditCounter] = useState(0);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [currentAuditKey, setCurrentAuditKey] = useState<string | null>(null);
+  const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') =>
@@ -253,6 +255,14 @@ export default function App() {
       return;
     }
 
+    // Quota-check vooraf — voorkomt Claude-call ($) bij gegarandeerde fail
+    if (quotaInfo && !quotaInfo.ok) {
+      setError(
+        `Je hebt je ${quotaInfo.quota} gratis audits deze maand gebruikt. Upgrade naar Webshop voor onbeperkt audits.`
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -273,6 +283,14 @@ export default function App() {
       setView('report');
       await saveAudit(parsed);
       showToast('Audit succesvol gegenereerd');
+
+      // Refresh quota zodat de teller voor de volgende audit klopt
+      try {
+        const info = await getQuotaInfo();
+        setQuotaInfo(info);
+      } catch {
+        /* niet kritisch */
+      }
     } catch (err) {
       console.error(err);
       if (err instanceof AuditFailure) {
@@ -282,6 +300,37 @@ export default function App() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ---- Checkout naar Mollie -----------------------------------------------
+
+  const handleCheckout = async (planSlug: 'webshop' | 'agency') => {
+    setCheckoutLoading(planSlug);
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planSlug }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 401) {
+          // Niet ingelogd — stuur door naar signup met return-url
+          window.location.href = `/signup?next=/`;
+          return;
+        }
+        showToast(data.error ?? 'Kon checkout niet starten', 'error');
+        return;
+      }
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Netwerkfout — probeer opnieuw', 'error');
+    } finally {
+      setCheckoutLoading(null);
     }
   };
 
@@ -366,6 +415,12 @@ export default function App() {
     void (async () => {
       await loadHistory();
       await loadCounter();
+      try {
+        const info = await getQuotaInfo();
+        setQuotaInfo(info);
+      } catch {
+        /* quota niet beschikbaar — geen blokkering, audits gaan door */
+      }
     })();
   }, []);
 
@@ -717,14 +772,20 @@ export default function App() {
                   <span className="text-4xl font-bold text-slate-900">€19</span>
                   <span className="text-slate-500 text-sm ml-1">/maand</span>
                 </div>
-                <a
-                  href={`mailto:${company.email.general}?subject=${encodeURIComponent(
-                    'Early access — Webshop-tier'
-                  )}`}
-                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-orange-500 hover:bg-orange-600 text-white text-center"
+                <button
+                  onClick={() => handleCheckout('webshop')}
+                  disabled={checkoutLoading !== null}
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white text-center flex items-center justify-center gap-2"
                 >
-                  Vraag early access
-                </a>
+                  {checkoutLoading === 'webshop' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Doorverwijzen...
+                    </>
+                  ) : (
+                    'Start Webshop — €19/mnd'
+                  )}
+                </button>
                 <ul className="space-y-2.5 mt-auto">
                   {[
                     'Account met audits in de cloud',
@@ -759,14 +820,20 @@ export default function App() {
                   <span className="text-4xl font-bold text-slate-900">€59</span>
                   <span className="text-slate-500 text-sm ml-1">/maand</span>
                 </div>
-                <a
-                  href={`mailto:${company.email.general}?subject=${encodeURIComponent(
-                    'Wachtlijst — Agency-tier'
-                  )}`}
-                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 hover:bg-slate-200 text-slate-900 text-center"
+                <button
+                  onClick={() => handleCheckout('agency')}
+                  disabled={checkoutLoading !== null}
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-900 text-center flex items-center justify-center gap-2"
                 >
-                  Word genotificeerd
-                </a>
+                  {checkoutLoading === 'agency' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Doorverwijzen...
+                    </>
+                  ) : (
+                    'Start Agency — €59/mnd'
+                  )}
+                </button>
                 <ul className="space-y-2.5 mt-auto">
                   {[
                     'Alles van Webshop',
