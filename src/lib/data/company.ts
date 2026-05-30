@@ -24,12 +24,16 @@ export const company = {
     country: 'Nederland',
   },
 
-  // Contact
+  // Contact — alles loopt voorlopig naar het gmail-adres tot we
+  // info@/support@/privacy@/legal@ aliases bij Hostnet hebben opgezet.
+  // De aparte keys blijven bestaan zodat we per use-case kunnen
+  // splitsen zodra de aliases er zijn, zonder de juridische pagina's
+  // opnieuw te hoeven aanraken.
   email: {
-    general: 'info@conversielek.nl',
-    support: 'support@conversielek.nl',
-    privacy: 'privacy@conversielek.nl',
-    legal: 'legal@conversielek.nl',
+    general: 'rootseedsoftware@gmail.com',
+    support: 'rootseedsoftware@gmail.com',
+    privacy: 'rootseedsoftware@gmail.com',
+    legal: 'rootseedsoftware@gmail.com',
   },
 
   // Datum van laatste juridische update — handmatig bumpen bij wijzigingen
