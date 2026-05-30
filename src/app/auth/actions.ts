@@ -91,8 +91,17 @@ export async function forgotPassword(formData: FormData) {
   const origin = `${proto}://${host}`;
 
   const supabase = await createClient();
+
+  // Supabase verifieert de token zelf via /auth/v1/verify en redirect daarna
+  // naar deze URL. We sturen de user direct naar /account met een
+  // success-melding, waar het bestaande "Wachtwoord wijzigen"-formulier
+  // staat. Geen geneste ?-query strings (Supabase's allowlist matcher
+  // verwerpt die soms en valt dan terug op Site URL = homepage).
+  const successMsg = encodeURIComponent(
+    'Stel hieronder direct een nieuw wachtwoord in.'
+  );
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/confirm?next=/account?reset=ok`,
+    redirectTo: `${origin}/account?success=${successMsg}`,
   });
 
   // Altijd dezelfde melding — anders kun je via dit endpoint testen
