@@ -8,6 +8,7 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 
 function errorParam(message: string): string {
@@ -71,6 +72,32 @@ export async function signOut() {
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
   redirect('/');
+}
+
+export async function forgotPassword(formData: FormData) {
+  const email = String(formData.get('email') ?? '').trim();
+
+  if (!email) {
+    redirect('/forgot-password' + errorParam('Vul je e-mailadres in.'));
+  }
+
+  // Bouw redirect-URL op zodat de link in de e-mail naar deze deployment
+  // wijst (productie of preview). Supabase stuurt z'n template-link met
+  // {{ .ConfirmationURL }} die naar /auth/confirm wijst, en die geleidt
+  // de user na verify door naar /account?reset=ok.
+  const hdrs = await headers();
+  const host = hdrs.get('host') ?? 'conversielek.nl';
+  const proto = hdrs.get('x-forwarded-proto') ?? 'https';
+  const origin = `${proto}://${host}`;
+
+  const supabase = await createClient();
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/confirm?next=/account?reset=ok`,
+  });
+
+  // Altijd dezelfde melding — anders kun je via dit endpoint testen
+  // welke e-mailadressen wel/niet in de database staan (account-enumeration).
+  redirect('/forgot-password?sent=1');
 }
 
 export async function changePassword(formData: FormData) {
