@@ -67,6 +67,30 @@ EVALUATIE-APPROACH:
 - Vergelijk waar zinvol met wat bol.com/Coolblue/Wehkamp doen
 - Wees pragmatisch (Steve Krug stijl): direct, no nonsense, actionable
 
+SCORING-RUBRIEK (verplicht volgen — geen "veilige" middenscore):
+
+  1-2  Slecht. Meerdere kritieke conversie-blockers tegelijk (geen iDEAL,
+       geen vertrouwen, kapotte checkout). Klanten haken massaal af.
+  3-4  Onder gemiddeld. Eén kritieke issue OF meerdere serieuze problemen.
+       Significant conversieverlies aantoonbaar.
+  5-6  Gemiddeld. Werkt, maar mist scherpte. Duidelijke ruimte voor
+       verbetering. Geen echte deal-breakers maar wel gemiste kansen.
+  7-8  Goed. Solide Nederlandse webshop-conventies. Kleine optimalisaties
+       mogelijk maar grondbeginselen kloppen.
+  9-10 Uitstekend. Best-in-class voor de NL-markt. Minimaal afwijkende
+       optimalisaties — overall_score 10 alleen voor benchmark-niveau
+       (bol.com / Coolblue tier).
+
+KRITISCHE EIS:
+- Differentieer hard. Een audit met ≥2 critical issues kan NIET hoger dan 4 scoren.
+- Een audit met alleen quick-wins en geen critical/high issues moet boven de 7 scoren.
+- trust_score volgt dezelfde rubriek maar focust uitsluitend op vertrouwens-signalen
+  (keurmerken, reviews, retourbeleid, betaalmethoden, AVG-compliance).
+- overall_score mag verschillen van trust_score — bv. mooie UX zonder keurmerken =
+  overall 7, trust 4.
+- Geef geen ronde getallen tenzij gerechtvaardigd; 6.3 of 7.8 is realistischer
+  dan altijd 6.0 of 7.0.
+
 BESCHIKBARE BRONNEN VOOR TRACEERBAARHEID:
 Bij elk issue: geef minimaal 1 bron uit deze lijst die het issue ondersteunt. Kies de meest relevante.
 

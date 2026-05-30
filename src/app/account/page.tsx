@@ -10,7 +10,18 @@ import { redirect } from 'next/navigation';
 import { ShoppingCart, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { changePassword, signOut } from '@/app/auth/actions';
+import { cancelSubscription } from '@/lib/billing-actions';
+import { getCurrentPlan } from '@/lib/billing';
 import MigrateLocalButton from './MigrateLocalButton';
+
+function formatDate(iso: string | null): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('nl-NL', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
 
 type Props = {
   searchParams: Promise<{ error?: string; success?: string }>;
@@ -27,6 +38,10 @@ export default async function AccountPage({ searchParams }: Props) {
   if (!user) {
     redirect('/login?error=' + encodeURIComponent('Log eerst in om je account te bekijken.'));
   }
+
+  // Huidig plan + subscription status
+  const { plan, status, current_period_end, cancel_at_period_end } =
+    await getCurrentPlan(user.id);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50/30 flex flex-col">
@@ -75,6 +90,80 @@ export default async function AccountPage({ searchParams }: Props) {
                 day: 'numeric',
               })}
             </p>
+          </div>
+
+          {/* Huidig pakket */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              Huidig pakket
+            </h2>
+            <div className="flex items-baseline gap-3 flex-wrap mb-1">
+              <p className="text-xl font-bold text-slate-900">{plan.name}</p>
+              {status === 'active' && !cancel_at_period_end && plan.slug !== 'free' && (
+                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
+                  Actief
+                </span>
+              )}
+              {status === 'active' && cancel_at_period_end && (
+                <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                  Eindigt op {formatDate(current_period_end)}
+                </span>
+              )}
+              {status === 'past_due' && (
+                <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                  Betaling mislukt
+                </span>
+              )}
+              {status === 'free' && (
+                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
+                  Gratis
+                </span>
+              )}
+            </div>
+
+            {plan.slug === 'free' ? (
+              <p className="text-sm text-slate-600 mt-2">
+                Je doet maximaal {plan.audit_quota_per_month} audits per maand.{' '}
+                <Link href="/" className="text-orange-600 hover:underline">
+                  Upgrade naar Webshop
+                </Link>{' '}
+                voor onbeperkt audits.
+              </p>
+            ) : (
+              <p className="text-sm text-slate-600 mt-2">
+                €{(plan.price_cents / 100).toFixed(2).replace('.', ',')} per maand
+                <span className="text-slate-400"> (excl. BTW)</span>
+                {status === 'active' && !cancel_at_period_end && current_period_end && (
+                  <>
+                    {' · '}volgende betaling rond{' '}
+                    <span className="font-medium text-slate-700">
+                      {formatDate(current_period_end)}
+                    </span>
+                  </>
+                )}
+              </p>
+            )}
+
+            {/* Cancel-knop alleen voor actieve betaalde subs die nog niet opgezegd zijn */}
+            {status === 'active' && !cancel_at_period_end && plan.slug !== 'free' && (
+              <form action={cancelSubscription} className="mt-4 pt-4 border-t border-slate-100">
+                <button
+                  type="submit"
+                  className="text-sm text-red-600 hover:text-red-700 underline"
+                >
+                  Abonnement opzeggen
+                </button>
+                <p className="text-xs text-slate-500 mt-1">
+                  Je houdt toegang tot het einde van de huidige betaalperiode.
+                </p>
+              </form>
+            )}
+
+            {cancel_at_period_end && (
+              <p className="text-xs text-slate-500 mt-3 italic">
+                Opgezegd — wordt niet automatisch verlengd.
+              </p>
+            )}
           </div>
 
           {/* Migrate localStorage → Supabase (alleen zichtbaar als er local audits zijn) */}
