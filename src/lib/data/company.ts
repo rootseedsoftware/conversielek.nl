@@ -13,15 +13,14 @@ export const company = {
   // Volledige URL
   url: 'https://conversielek.nl',
 
-  // ⚠️ INVULLEN ZODRA BESCHIKBAAR ⚠️
-  kvk: 'INVULLEN', // bv. '12345678'
-  btw: 'INVULLEN', // bv. 'NL123456789B01'
+  kvk: '89535782',
+  btw: 'NL004739776B70',
 
-  // Vestigingsadres — INVULLEN
+  // Vestigingsadres
   address: {
-    street: 'INVULLEN',
-    postalCode: 'INVULLEN',
-    city: 'INVULLEN',
+    street: 'Goeman Borgesiuslaan 77',
+    postalCode: '3515 ET',
+    city: 'Utrecht',
     country: 'Nederland',
   },
 
