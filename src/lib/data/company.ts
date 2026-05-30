@@ -5,7 +5,7 @@
 
 export const company = {
   // Wettelijke naam zoals ingeschreven bij KvK
-  legalName: 'Root Seed Software',
+  legalName: 'TROFSOF Group B.V.',
   // Handelsnaam (de naam waaronder je naar buiten treedt)
   tradeName: 'Conversielek',
   // Domein zonder protocol
@@ -13,8 +13,8 @@ export const company = {
   // Volledige URL
   url: 'https://conversielek.nl',
 
-  kvk: '89535782',
-  btw: 'NL004739776B70',
+  kvk: '95131396',
+  btw: 'NL867014064B01',
 
   // Vestigingsadres
   address: {
@@ -38,5 +38,5 @@ export const company = {
 
   // Datum van laatste juridische update — handmatig bumpen bij wijzigingen
   // aan privacy of AV zodat gebruikers zien dat er iets veranderd is.
-  legalUpdatedAt: '2026-05-26',
+  legalUpdatedAt: '2026-05-30',
 } as const;
