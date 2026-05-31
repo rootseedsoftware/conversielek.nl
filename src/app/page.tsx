@@ -29,6 +29,9 @@ import {
   CreditCard,
   MessageSquare,
   Library,
+  TrendingDown,
+  GitCompare,
+  Minus,
 } from 'lucide-react';
 
 import {
@@ -57,10 +60,11 @@ import { exportAuditAsPdf } from '@/lib/pdf-export';
 import { compressScreenshot } from '@/lib/image-compress';
 import { getQuotaInfo, type QuotaInfo } from '@/lib/billing-actions';
 import { sendAuditByEmail } from '@/lib/email-actions';
+import { compareAudits } from '@/lib/audit-compare';
 
 // ---- Local types -----------------------------------------------------------
 
-type View = 'landing' | 'audit' | 'history' | 'report';
+type View = 'landing' | 'audit' | 'history' | 'report' | 'compare';
 
 type Toast = { message: string; type: 'success' | 'error' };
 
@@ -120,6 +124,10 @@ export default function App() {
   const [currentAuditKey, setCurrentAuditKey] = useState<string | null>(null);
   const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareSelection, setCompareSelection] = useState<string[]>([]);
+  const [compareLeft, setCompareLeft] = useState<HistoryItem | null>(null);
+  const [compareRight, setCompareRight] = useState<HistoryItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') =>
@@ -955,19 +963,39 @@ export default function App() {
               </div>
               <span className="font-bold text-slate-900">Conversielek</span>
             </button>
-            <button
-              onClick={() => setView('audit')}
-              className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
-            >
-              Nieuwe audit
-            </button>
+            <div className="flex items-center gap-2">
+              {history.length >= 2 && (
+                <button
+                  onClick={() => {
+                    setCompareMode(!compareMode);
+                    setCompareSelection([]);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
+                    compareMode
+                      ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <GitCompare className="w-4 h-4" />
+                  {compareMode ? 'Annuleer vergelijken' : 'Vergelijken'}
+                </button>
+              )}
+              <button
+                onClick={() => setView('audit')}
+                className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              >
+                Nieuwe audit
+              </button>
+            </div>
           </div>
         </nav>
 
         <div className="max-w-4xl mx-auto px-6 py-12">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Mijn audits</h1>
           <p className="text-slate-600 mb-8">
-            Je eerder uitgevoerde audits — gegroepeerd per webshop voor vergelijking.
+            {compareMode
+              ? 'Selecteer 2 audits van dezelfde webshop + flow om ze te vergelijken.'
+              : 'Je eerder uitgevoerde audits — gegroepeerd per webshop voor vergelijking.'}
           </p>
 
           {historyLoading ? (
@@ -989,18 +1017,64 @@ export default function App() {
               </button>
             </div>
           ) : (
+            <>
             <div className="space-y-3">
               {history.map((item) => {
                 const flow = flowTypes.find((f) => f.value === item.flowType);
                 const FlowIcon = flow?.icon || Home;
+
+                // Compare-mode: kan dit item gekozen worden?
+                // Eerste keuze bepaalt webshopName + flowType — daarna alleen
+                // matchende audits klikbaar.
+                const firstKey = compareSelection[0];
+                const firstItem = firstKey ? history.find((h) => h.key === firstKey) : null;
+                const isSelected = compareSelection.includes(item.key);
+                const canSelect =
+                  !firstItem ||
+                  isSelected ||
+                  (firstItem.webshopName === item.webshopName &&
+                    firstItem.flowType === item.flowType);
+
+                const toggleSelect = () => {
+                  if (isSelected) {
+                    setCompareSelection((s) => s.filter((k) => k !== item.key));
+                  } else if (compareSelection.length < 2 && canSelect) {
+                    setCompareSelection((s) => [...s, item.key]);
+                  }
+                };
+
                 return (
                   <div
                     key={item.key}
-                    className="bg-white rounded-xl border border-slate-200 p-5 hover:border-orange-300 transition group"
+                    className={`bg-white rounded-xl border p-5 transition group ${
+                      isSelected
+                        ? 'border-orange-400 ring-2 ring-orange-100'
+                        : compareMode && !canSelect
+                        ? 'border-slate-200 opacity-40'
+                        : 'border-slate-200 hover:border-orange-300'
+                    }`}
                   >
                     <div className="flex items-center justify-between gap-4">
+                      {compareMode && (
+                        <button
+                          onClick={toggleSelect}
+                          disabled={!canSelect && !isSelected}
+                          aria-label={isSelected ? 'Deselecteren' : 'Selecteren'}
+                          className={`flex-shrink-0 w-6 h-6 rounded-md border-2 transition flex items-center justify-center ${
+                            isSelected
+                              ? 'bg-orange-500 border-orange-500'
+                              : 'border-slate-300 bg-white hover:border-orange-400 disabled:cursor-not-allowed'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-4 h-4 text-white" />}
+                        </button>
+                      )}
                       <button
                         onClick={async () => {
+                          if (compareMode) {
+                            toggleSelect();
+                            return;
+                          }
                           setAudit(item.audit);
                           setCurrentAuditKey(item.key);
                           setFlowType(item.flowType);
@@ -1013,7 +1087,8 @@ export default function App() {
                           }
                           setView('report');
                         }}
-                        className="flex-1 text-left flex items-center gap-4"
+                        disabled={compareMode && !canSelect && !isSelected}
+                        className="flex-1 text-left flex items-center gap-4 disabled:cursor-not-allowed"
                       >
                         <div className={`text-3xl font-bold ${getScoreColor(item.audit.overall_score)}`}>
                           {item.audit.overall_score}
@@ -1034,20 +1109,245 @@ export default function App() {
                             </span>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
+                        {!compareMode && (
+                          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
+                        )}
                       </button>
-                      <button
-                        onClick={() => deleteAuditFromHistory(item.key)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!compareMode && (
+                        <button
+                          onClick={() => deleteAuditFromHistory(item.key)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            {/* Floating action button — verschijnt als precies 2 audits zijn gekozen */}
+            {compareMode && compareSelection.length === 2 && (
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                <button
+                  onClick={() => {
+                    const a = history.find((h) => h.key === compareSelection[0]);
+                    const b = history.find((h) => h.key === compareSelection[1]);
+                    if (!a || !b) return;
+                    // Oudste links, nieuwste rechts
+                    const [oldA, newA] =
+                      a.timestamp < b.timestamp ? [a, b] : [b, a];
+                    setCompareLeft(oldA);
+                    setCompareRight(newA);
+                    setView('compare');
+                    setCompareMode(false);
+                    setCompareSelection([]);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-full shadow-xl font-medium flex items-center gap-2 transition"
+                >
+                  <GitCompare className="w-4 h-4" />
+                  Vergelijk deze 2
+                </button>
+              </div>
+            )}
+            </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // COMPARE
+  // ============================================================
+  if (view === 'compare' && compareLeft && compareRight) {
+    const diff = compareAudits(compareLeft.audit, compareRight.audit);
+    const scoreDiff =
+      compareRight.audit.overall_score - compareLeft.audit.overall_score;
+    const flowLeft = flowTypes.find((f) => f.value === compareLeft.flowType);
+
+    const fmtDate = (ts: number) =>
+      new Date(ts).toLocaleDateString('nl-NL', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <ToastNotification toast={toast} />
+        <nav className="border-b border-slate-100 bg-white sticky top-0 z-10">
+          <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <button onClick={() => setView('landing')} className="flex items-center gap-2">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold text-slate-900">Conversielek</span>
+            </button>
+            <button
+              onClick={() => {
+                setCompareLeft(null);
+                setCompareRight(null);
+                setView('history');
+              }}
+              className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+            >
+              <Clock className="w-4 h-4" />
+              Terug naar Mijn audits
+            </button>
+          </div>
+        </nav>
+
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
+              <GitCompare className="w-3.5 h-3.5" />
+              Vergelijking
+            </div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-1">
+              {compareLeft.webshopName}
+            </h1>
+            <p className="text-sm text-slate-600">
+              {flowLeft?.label} · {fmtDate(compareLeft.timestamp)} →{' '}
+              {fmtDate(compareRight.timestamp)}
+            </p>
+          </div>
+
+          {/* Score-diff card */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 mb-6">
+            <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-4 text-center">
+              Score-evolutie
+            </div>
+            <div className="flex items-center justify-center gap-6 sm:gap-12 flex-wrap">
+              <div className="text-center">
+                <div className="text-xs text-slate-500 mb-1">
+                  {fmtDate(compareLeft.timestamp)}
+                </div>
+                <div
+                  className={`text-5xl font-bold ${getScoreColor(compareLeft.audit.overall_score)}`}
+                >
+                  {compareLeft.audit.overall_score}
+                  <span className="text-2xl text-slate-300">/10</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div
+                  className={`text-3xl font-bold flex items-center gap-1 ${
+                    scoreDiff > 0
+                      ? 'text-emerald-600'
+                      : scoreDiff < 0
+                      ? 'text-red-600'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  {scoreDiff > 0 && <TrendingUp className="w-7 h-7" />}
+                  {scoreDiff < 0 && <TrendingDown className="w-7 h-7" />}
+                  {scoreDiff === 0 && <Minus className="w-7 h-7" />}
+                  {scoreDiff > 0 ? '+' : ''}
+                  {scoreDiff.toFixed(1)}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">verschil</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-slate-500 mb-1">
+                  {fmtDate(compareRight.timestamp)}
+                </div>
+                <div
+                  className={`text-5xl font-bold ${getScoreColor(compareRight.audit.overall_score)}`}
+                >
+                  {compareRight.audit.overall_score}
+                  <span className="text-2xl text-slate-300">/10</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Drie buckets */}
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* Opgelost */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900 text-sm">Opgelost</div>
+                  <div className="text-xs text-slate-500">{diff.resolved.length}</div>
+                </div>
+              </div>
+              {diff.resolved.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">Geen issues opgelost</p>
+              ) : (
+                <ul className="space-y-2">
+                  {diff.resolved.map((issue, i) => (
+                    <li
+                      key={i}
+                      className="text-sm text-slate-700 line-through decoration-emerald-500"
+                      title={issue.description}
+                    >
+                      {issue.title}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Blijft bestaan */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <Minus className="w-4 h-4 text-orange-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900 text-sm">Blijft bestaan</div>
+                  <div className="text-xs text-slate-500">{diff.persisting.length}</div>
+                </div>
+              </div>
+              {diff.persisting.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">Niets blijft hangen 🎉</p>
+              ) : (
+                <ul className="space-y-2">
+                  {diff.persisting.map((issue, i) => (
+                    <li key={i} className="text-sm text-slate-700" title={issue.description}>
+                      {issue.title}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Nieuw */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900 text-sm">Nieuwe issues</div>
+                  <div className="text-xs text-slate-500">{diff.newIssues.length}</div>
+                </div>
+              </div>
+              {diff.newIssues.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">Geen nieuwe issues 👍</p>
+              ) : (
+                <ul className="space-y-2">
+                  {diff.newIssues.map((issue, i) => (
+                    <li key={i} className="text-sm text-slate-700" title={issue.description}>
+                      {issue.title}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-slate-400 mt-8">
+            Vergelijking gebaseerd op titel-matching. Audits met
+            geherformuleerde issues kunnen als &quot;opgelost + nieuw&quot;
+            verschijnen i.p.v. &quot;blijft&quot;.
+          </p>
         </div>
       </div>
     );
