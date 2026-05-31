@@ -1,12 +1,12 @@
-// Dunne auth-strip bovenaan elke pagina. Server component — auth-state
-// wordt server-side bepaald, dus geen flash-of-wrong-state bij hydration.
+// Globale auth-strip bovenaan elke pagina. Server component — auth-state
+// wordt server-side bepaald (geen flash-of-wrong-state bij hydration).
 //
-// - Uitgelogd: links naar /login en /signup
-// - Ingelogd: email + uitlog-button (form action naar signOut server action)
+// Ingelogd  → UserMenu (avatar + dropdown met Account/Uitloggen)
+// Uitgelogd → "Inloggen · Account aanmaken" links
 
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { signOut } from '@/app/auth/actions';
+import UserMenu from './UserMenu';
 
 export default async function AuthBar() {
   // Defensive: als Supabase env vars ontbreken, render alleen de "uit"-state
@@ -25,39 +25,26 @@ export default async function AuthBar() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="border-b border-slate-100 bg-slate-50/60 text-xs">
-      <div className="max-w-6xl mx-auto px-6 py-2 flex items-center justify-end gap-3 text-slate-600">
-        {user ? (
-          <>
-            <Link href="/account" className="hover:text-slate-900 transition">
-              <span className="text-slate-500">Ingelogd als</span>{' '}
-              <span className="font-medium text-slate-900 underline decoration-slate-300 decoration-dotted underline-offset-2">
-                {user.email}
-              </span>
-            </Link>
-            <span className="text-slate-300">·</span>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="text-slate-600 hover:text-slate-900 transition"
-              >
-                Uitloggen
-              </button>
-            </form>
-          </>
+    <div className="border-b border-slate-100 bg-white/80 backdrop-blur">
+      <div className="max-w-6xl mx-auto px-6 h-11 flex items-center justify-end gap-3">
+        {user?.email ? (
+          <UserMenu email={user.email} />
         ) : (
-          <>
-            <Link href="/login" className="hover:text-slate-900 transition">
+          <div className="flex items-center gap-3 text-xs text-slate-600">
+            <Link
+              href="/login"
+              className="hover:text-slate-900 transition font-medium"
+            >
               Inloggen
             </Link>
             <span className="text-slate-300">·</span>
             <Link
               href="/signup"
-              className="text-orange-600 hover:text-orange-700 font-medium transition"
+              className="text-orange-600 hover:text-orange-700 font-semibold transition"
             >
               Account aanmaken
             </Link>
-          </>
+          </div>
         )}
       </div>
     </div>

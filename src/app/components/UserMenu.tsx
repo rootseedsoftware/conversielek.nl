@@ -1,0 +1,119 @@
+'use client';
+
+// Avatar-dropdown voor ingelogde gebruikers — vervangt de eerdere
+// "Ingelogd als x · Uitloggen"-tekststrip die slechte UX gaf (account-
+// link was alleen een onderlijnd email-adres, niet ontdekbaar).
+//
+// Volgt het standaard SaaS-pattern (Stripe/Vercel/Notion): initialen-
+// cirkel met chevron rechtsboven, klik opent dropdown met email-header
+// + clear actiekeuzes + uitloggen.
+//
+// Accessibility:
+//  - aria-haspopup + aria-expanded op de trigger
+//  - Escape sluit
+//  - Klik buiten dropdown sluit
+//  - keyboard-bediening via native button + Link focus
+
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { ChevronDown, LogOut, Settings, ListChecks } from 'lucide-react';
+import { signOut } from '@/app/auth/actions';
+
+export default function UserMenu({ email }: { email: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Sluit bij klik buiten dropdown
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  // Sluit bij Escape
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  const initial = email[0]?.toUpperCase() ?? '?';
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Account-menu openen"
+        className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-orange-200"
+      >
+        <div className="w-7 h-7 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">
+          {initial}
+        </div>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-slate-500 transition ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-50 origin-top-right"
+        >
+          {/* Email-header */}
+          <div className="px-3 py-2.5 border-b border-slate-100">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+              Ingelogd als
+            </div>
+            <div className="text-sm font-medium text-slate-900 truncate" title={email}>
+              {email}
+            </div>
+          </div>
+
+          {/* Acties */}
+          <Link
+            href="/account"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+          >
+            <Settings className="w-4 h-4 text-slate-400" />
+            Account &amp; pakket
+          </Link>
+          <Link
+            href="/"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+          >
+            <ListChecks className="w-4 h-4 text-slate-400" />
+            Naar de app
+          </Link>
+
+          <div className="border-t border-slate-100 my-1" />
+
+          <form action={signOut}>
+            <button
+              type="submit"
+              role="menuitem"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
+            >
+              <LogOut className="w-4 h-4 text-slate-400" />
+              Uitloggen
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
