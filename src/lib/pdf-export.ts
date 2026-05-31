@@ -10,6 +10,7 @@ import type { FlowType } from '@/lib/data/flow-types';
 import { flowTypes } from '@/lib/data/flow-types';
 import { productCategories } from '@/lib/data/categories';
 import { severityLabels } from '@/lib/data/severity';
+import { company } from '@/lib/data/company';
 
 const severityStyles: Record<AuditResult['issues'][number]['severity'], string> = {
   critical: '#dc2626',
@@ -126,7 +127,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .nl-check { background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; }
 .nl-check-label { font-weight: 600; font-size: 13px; color: #0f172a; margin-bottom: 4px; }
 .nl-check-text { font-size: 13px; color: #475569; }
-.footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 11px; }
+.footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 10px; line-height: 1.6; }
+.footer-grid { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.footer-brand { flex: 1; min-width: 180px; }
+.footer-brand-name { color: #c2410c; font-weight: 700; font-size: 13px; margin-bottom: 2px; letter-spacing: -0.01em; }
+.footer-brand-tagline { color: #64748b; font-size: 11px; }
+.footer-company { text-align: right; color: #64748b; font-size: 10px; min-width: 180px; }
+.footer-company-name { color: #475569; font-weight: 600; margin-bottom: 2px; }
+.footer-meta { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; text-align: center; font-size: 10px; color: #94a3b8; }
 </style></head><body>
 <div class="header">
   <div class="badge">Conversielek Audit · ${escapeHtml(flowLabel)}</div>
@@ -229,9 +237,23 @@ ${
       (q, i) => `<li class="quickwin-item"><span class="quickwin-number">${i + 1}</span><span>${escapeHtml(q)}</span></li>`
     )
     .join('')}</ul></div>
-<div class="footer">Conversielek.nl · Nederlandse Webshop UX Audit · Gegenereerd ${escapeHtml(
-    new Date().toLocaleString('nl-NL')
-  )}</div>
+<div class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-brand-name">${escapeHtml(company.tradeName)}.nl</div>
+      <div class="footer-brand-tagline">Nederlandse webshop UX-audit — gemaakt voor de NL-markt</div>
+    </div>
+    <div class="footer-company">
+      <div class="footer-company-name">${escapeHtml(company.legalName)}</div>
+      ${escapeHtml(company.address.street)}<br>
+      ${escapeHtml(company.address.postalCode)} ${escapeHtml(company.address.city)}<br>
+      KvK ${escapeHtml(company.kvk)} · BTW ${escapeHtml(company.btw)}
+    </div>
+  </div>
+  <div class="footer-meta">
+    Gegenereerd op ${escapeHtml(new Date().toLocaleString('nl-NL'))} · ${escapeHtml(company.url)}
+  </div>
+</div>
 <script>window.onload = () => setTimeout(() => window.print(), 500);</script>
 </body></html>`;
 
