@@ -56,6 +56,7 @@ import { buildAuditPrompt } from '@/lib/prompt';
 import { exportAuditAsPdf } from '@/lib/pdf-export';
 import { compressScreenshot } from '@/lib/image-compress';
 import { getQuotaInfo, type QuotaInfo } from '@/lib/billing-actions';
+import { sendAuditByEmail } from '@/lib/email-actions';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -283,6 +284,24 @@ export default function App() {
       setView('report');
       await saveAudit(parsed);
       showToast('Audit succesvol gegenereerd');
+
+      // Stuur per e-mail als de user dat heeft aangevinkt — fire-and-forget
+      // zodat user niet hoeft te wachten op SMTP-roundtrip.
+      if (email.trim()) {
+        void sendAuditByEmail({
+          to: email.trim(),
+          webshopName: webshopName || webshopUrl || 'jouw webshop',
+          audit: parsed,
+        })
+          .then((res) => {
+            if (res.ok) {
+              showToast(`Rapport per mail naar ${email.trim()} gestuurd`);
+            } else {
+              console.warn('[email] niet verstuurd:', res.error);
+            }
+          })
+          .catch((e) => console.error('[email] send error:', e));
+      }
 
       // Refresh quota zodat de teller voor de volgende audit klopt
       try {
