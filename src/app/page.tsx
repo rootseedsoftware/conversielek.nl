@@ -994,7 +994,7 @@ export default function App() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Mijn audits</h1>
           <p className="text-slate-600 mb-8">
             {compareMode
-              ? 'Selecteer 2 audits van dezelfde webshop + flow om ze te vergelijken.'
+              ? 'Selecteer 2 audits van dezelfde flow (bv. 2× homepage). Mag van dezelfde webshop (voor/na) of van verschillende webshops (benchmark).'
               : 'Je eerder uitgevoerde audits — gegroepeerd per webshop voor vergelijking.'}
           </p>
 
@@ -1029,11 +1029,12 @@ export default function App() {
                 const firstKey = compareSelection[0];
                 const firstItem = firstKey ? history.find((h) => h.key === firstKey) : null;
                 const isSelected = compareSelection.includes(item.key);
+                // Constraint: alleen zelfde flowType vergelijken. Webshop-naam
+                // mag verschillen — daarmee kun je ook concurrenten of
+                // klant-portfolio's tegen elkaar zetten. Cross-flow vergelijken
+                // is onzinnig (homepage-heuristieken vs checkout-heuristieken).
                 const canSelect =
-                  !firstItem ||
-                  isSelected ||
-                  (firstItem.webshopName === item.webshopName &&
-                    firstItem.flowType === item.flowType);
+                  !firstItem || isSelected || firstItem.flowType === item.flowType;
 
                 const toggleSelect = () => {
                   if (isSelected) {
@@ -1200,19 +1201,35 @@ export default function App() {
         </nav>
 
         <div className="max-w-5xl mx-auto px-6 py-8">
-          {/* Header */}
+          {/* Header — verschillende layout afhankelijk van zelfde-shop of cross-shop */}
           <div className="mb-6">
             <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
               <GitCompare className="w-3.5 h-3.5" />
-              Vergelijking
+              Vergelijking · {flowLeft?.label}
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-1">
-              {compareLeft.webshopName}
-            </h1>
-            <p className="text-sm text-slate-600">
-              {flowLeft?.label} · {fmtDate(compareLeft.timestamp)} →{' '}
-              {fmtDate(compareRight.timestamp)}
-            </p>
+            {compareLeft.webshopName === compareRight.webshopName ? (
+              <>
+                <h1 className="text-3xl font-bold text-slate-900 mb-1">
+                  {compareLeft.webshopName}
+                </h1>
+                <p className="text-sm text-slate-600">
+                  Voor/na — {fmtDate(compareLeft.timestamp)} →{' '}
+                  {fmtDate(compareRight.timestamp)}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-slate-900 mb-1">
+                  <span className="text-slate-700">{compareLeft.webshopName}</span>
+                  <span className="text-slate-300 mx-2">vs</span>
+                  <span className="text-slate-700">{compareRight.webshopName}</span>
+                </h1>
+                <p className="text-sm text-slate-600">
+                  Benchmark · audits van {fmtDate(compareLeft.timestamp)} en{' '}
+                  {fmtDate(compareRight.timestamp)}
+                </p>
+              </>
+            )}
           </div>
 
           {/* Score-diff card */}
@@ -1264,84 +1281,119 @@ export default function App() {
             </div>
           </div>
 
-          {/* Drie buckets */}
-          <div className="grid md:grid-cols-3 gap-4">
-            {/* Opgelost */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-900 text-sm">Opgelost</div>
-                  <div className="text-xs text-slate-500">{diff.resolved.length}</div>
-                </div>
-              </div>
-              {diff.resolved.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">Geen issues opgelost</p>
-              ) : (
-                <ul className="space-y-2">
-                  {diff.resolved.map((issue, i) => (
-                    <li
-                      key={i}
-                      className="text-sm text-slate-700 line-through decoration-emerald-500"
-                      title={issue.description}
-                    >
-                      {issue.title}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+          {/* Labels passen zich aan op basis van zelfde-shop (voor/na)
+              vs cross-shop (benchmark). */}
+          {(() => {
+            const sameShop = compareLeft.webshopName === compareRight.webshopName;
+            const labels = sameShop
+              ? {
+                  resolved: { title: 'Opgelost', empty: 'Geen issues opgelost' },
+                  persisting: { title: 'Blijft bestaan', empty: 'Niets blijft hangen 🎉' },
+                  newIssues: { title: 'Nieuwe issues', empty: 'Geen nieuwe issues 👍' },
+                }
+              : {
+                  resolved: {
+                    title: `Alleen bij ${compareLeft.webshopName}`,
+                    empty: 'Geen issues uniek voor de eerste shop',
+                  },
+                  persisting: {
+                    title: 'Bij allebei',
+                    empty: 'Geen overlap',
+                  },
+                  newIssues: {
+                    title: `Alleen bij ${compareRight.webshopName}`,
+                    empty: 'Geen issues uniek voor de tweede shop',
+                  },
+                };
 
-            {/* Blijft bestaan */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
-                  <Minus className="w-4 h-4 text-orange-600" />
+            return (
+              <div className="grid md:grid-cols-3 gap-4">
+                {/* Bucket 1 — opgelost / alleen bij A */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-900 text-sm">
+                        {labels.resolved.title}
+                      </div>
+                      <div className="text-xs text-slate-500">{diff.resolved.length}</div>
+                    </div>
+                  </div>
+                  {diff.resolved.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">{labels.resolved.empty}</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {diff.resolved.map((issue, i) => (
+                        <li
+                          key={i}
+                          className={`text-sm text-slate-700 ${
+                            sameShop ? 'line-through decoration-emerald-500' : ''
+                          }`}
+                          title={issue.description}
+                        >
+                          {issue.title}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div>
-                  <div className="font-semibold text-slate-900 text-sm">Blijft bestaan</div>
-                  <div className="text-xs text-slate-500">{diff.persisting.length}</div>
-                </div>
-              </div>
-              {diff.persisting.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">Niets blijft hangen 🎉</p>
-              ) : (
-                <ul className="space-y-2">
-                  {diff.persisting.map((issue, i) => (
-                    <li key={i} className="text-sm text-slate-700" title={issue.description}>
-                      {issue.title}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
 
-            {/* Nieuw */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-4 h-4 text-red-600" />
+                {/* Bucket 2 — blijft bestaan / bij beide */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                      <Minus className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-900 text-sm">
+                        {labels.persisting.title}
+                      </div>
+                      <div className="text-xs text-slate-500">{diff.persisting.length}</div>
+                    </div>
+                  </div>
+                  {diff.persisting.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">{labels.persisting.empty}</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {diff.persisting.map((issue, i) => (
+                        <li key={i} className="text-sm text-slate-700" title={issue.description}>
+                          {issue.title}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div>
-                  <div className="font-semibold text-slate-900 text-sm">Nieuwe issues</div>
-                  <div className="text-xs text-slate-500">{diff.newIssues.length}</div>
+
+                {/* Bucket 3 — nieuw / alleen bij B */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                      <AlertCircle className="w-4 h-4 text-red-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-900 text-sm">
+                        {labels.newIssues.title}
+                      </div>
+                      <div className="text-xs text-slate-500">{diff.newIssues.length}</div>
+                    </div>
+                  </div>
+                  {diff.newIssues.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">{labels.newIssues.empty}</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {diff.newIssues.map((issue, i) => (
+                        <li key={i} className="text-sm text-slate-700" title={issue.description}>
+                          {issue.title}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
-              {diff.newIssues.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">Geen nieuwe issues 👍</p>
-              ) : (
-                <ul className="space-y-2">
-                  {diff.newIssues.map((issue, i) => (
-                    <li key={i} className="text-sm text-slate-700" title={issue.description}>
-                      {issue.title}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+            );
+          })()}
 
           <p className="text-center text-xs text-slate-400 mt-8">
             Vergelijking gebaseerd op titel-matching. Audits met
