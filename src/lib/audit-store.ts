@@ -101,8 +101,12 @@ export async function loadHistory(): Promise<HistoryItem[]> {
       .order('created_at', { ascending: false });
 
     if (error) {
+      // Bewust throwen ipv silent []: RLS-fouten verbergen audits zonder
+      // dat de UI iets toont — kost ons meerdere debug-rondes voor we
+      // doorhebben dat de policy fout staat. Page.tsx vangt deze throw
+      // op met een zichtbare toast.
       console.error('Supabase select failed:', error);
-      return [];
+      throw new Error(`Audits niet zichtbaar (RLS): ${error.message}`);
     }
 
     return (data ?? []).map((row): HistoryItem => ({

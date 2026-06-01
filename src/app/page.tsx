@@ -172,8 +172,13 @@ export default function App() {
     try {
       const items = await fetchHistory();
       setHistory(items);
-    } catch {
-      /* no history yet */
+    } catch (e) {
+      // Was eerder silent (`catch {}`) — daardoor dacht de UI dat user
+      // gewoon geen audits had terwijl RLS ze verborg. Toon nu een toast
+      // zodat we de oorzaak direct zien.
+      const msg = e instanceof Error ? e.message : 'Onbekende fout bij laden audits';
+      console.error('loadHistory failed:', e);
+      setToast({ type: 'error', message: msg });
     } finally {
       setHistoryLoading(false);
     }
