@@ -130,6 +130,21 @@ export default function App() {
   const [compareRight, setCompareRight] = useState<HistoryItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Lees ?view=audit|history van de URL op mount (gebruikt door de
+  // UserMenu links) zodat de juiste view geopend wordt — ook als user
+  // al op / staat. Bewust geen useSearchParams (vereist Suspense in
+  // Next 16) — UserMenu gebruikt <a href> voor full reload zodat dit
+  // effect altijd opnieuw runt bij navigatie.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    queueMicrotask(() => {
+      const v = new URLSearchParams(window.location.search).get('view');
+      if (v === 'audit' || v === 'history') {
+        setView(v as View);
+      }
+    });
+  }, []);
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') =>
     setToast({ message, type });
 

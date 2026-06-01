@@ -16,7 +16,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, LogOut, Settings, ListChecks } from 'lucide-react';
+import { ChevronDown, LogOut, Settings, ListChecks, Zap } from 'lucide-react';
 import { signOut } from '@/app/auth/actions';
 
 export default function UserMenu({ email }: { email: string }) {
@@ -81,6 +81,34 @@ export default function UserMenu({ email }: { email: string }) {
           </div>
 
           {/* Acties */}
+          {/* Buttons + window.location ipv <Link>: forceert page.tsx
+              remount waardoor de useEffect die ?view leest opnieuw runt.
+              Next Link doet soft-navigation, dan firet de mount-effect
+              niet opnieuw als user al op / is. */}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              window.location.href = '/?view=audit';
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
+          >
+            <Zap className="w-4 h-4 text-slate-400" />
+            Nieuwe audit
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              window.location.href = '/?view=history';
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
+          >
+            <ListChecks className="w-4 h-4 text-slate-400" />
+            Mijn audits
+          </button>
           <Link
             href="/account"
             role="menuitem"
@@ -89,15 +117,6 @@ export default function UserMenu({ email }: { email: string }) {
           >
             <Settings className="w-4 h-4 text-slate-400" />
             Account &amp; pakket
-          </Link>
-          <Link
-            href="/"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
-          >
-            <ListChecks className="w-4 h-4 text-slate-400" />
-            Naar de app
           </Link>
 
           <div className="border-t border-slate-100 my-1" />
