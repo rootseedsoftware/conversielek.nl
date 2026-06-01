@@ -16,10 +16,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, LogOut, Settings, ListChecks, Zap } from 'lucide-react';
+import { ChevronDown, LogOut, Settings, ListChecks, Zap, Shield } from 'lucide-react';
 import { signOut } from '@/app/auth/actions';
 
-export default function UserMenu({ email }: { email: string }) {
+export default function UserMenu({
+  email,
+  showAdminLink = false,
+}: {
+  email: string;
+  showAdminLink?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -118,6 +124,21 @@ export default function UserMenu({ email }: { email: string }) {
             <Settings className="w-4 h-4 text-slate-400" />
             Account &amp; pakket
           </Link>
+
+          {showAdminLink && (
+            <>
+              <div className="border-t border-slate-100 my-1" />
+              <Link
+                href="/admin"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-orange-700 hover:bg-orange-50 transition font-medium"
+              >
+                <Shield className="w-4 h-4 text-orange-500" />
+                Admin
+              </Link>
+            </>
+          )}
 
           <div className="border-t border-slate-100 my-1" />
 

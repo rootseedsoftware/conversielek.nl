@@ -6,6 +6,7 @@
 
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin-auth';
 import UserMenu from './UserMenu';
 
 export default async function AuthBar() {
@@ -24,11 +25,14 @@ export default async function AuthBar() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Admin-flag server-side bepalen — niet onthullen aan client als false
+  const showAdminLink = user?.email ? await isAdmin() : false;
+
   return (
     <div className="border-b border-slate-100 bg-white/80 backdrop-blur">
       <div className="max-w-6xl mx-auto px-6 h-11 flex items-center justify-end gap-3">
         {user?.email ? (
-          <UserMenu email={user.email} />
+          <UserMenu email={user.email} showAdminLink={showAdminLink} />
         ) : (
           <div className="flex items-center gap-3 text-xs text-slate-600">
             <Link
