@@ -367,7 +367,13 @@ export default function App() {
           window.location.href = `/signup?next=/`;
           return;
         }
-        showToast(data.error ?? 'Kon checkout niet starten', 'error');
+        // Mollie's specifieke fout (regelbreuk + kleinere font in toast door
+        // nieuwe regel) — zo zie je direct of het "iDEAL niet actief",
+        // "amount te klein", "metadata invalid" etc. is.
+        const msg = data.detail
+          ? `${data.error ?? 'Checkout-fout'}\nMollie: ${data.detail}`
+          : (data.error ?? 'Kon checkout niet starten');
+        showToast(msg, 'error');
         return;
       }
       if (data.checkoutUrl) {

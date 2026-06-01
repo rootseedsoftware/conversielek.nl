@@ -23,6 +23,24 @@ import { getPlanBySlug } from '@/lib/billing';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
+/**
+ * Mollie's SDK throwt MollieApiError met `message`, `statusCode`, `field`,
+ * `documentationUrl`. We extracten een leesbare string voor de client zonder
+ * gevoelige info te lekken (geen stack-traces, geen API-keys). Reduceert
+ * debug-tijd want de echte oorzaak komt direct in de UI.
+ */
+function extractMollieError(e: unknown): string {
+  if (typeof e === 'object' && e !== null) {
+    const err = e as { message?: string; statusCode?: number; field?: string };
+    const parts: string[] = [];
+    if (err.message) parts.push(err.message);
+    if (err.field) parts.push(`(veld: ${err.field})`);
+    if (err.statusCode) parts.push(`[HTTP ${err.statusCode}]`);
+    if (parts.length > 0) return parts.join(' ');
+  }
+  return e instanceof Error ? e.message : 'onbekende fout';
+}
+
 export async function POST(req: NextRequest) {
   // 1. Auth
   const supabase = await createClient();
@@ -78,7 +96,10 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       console.error('[checkout] customers.create failed:', e);
       return Response.json(
-        { error: 'Kon Mollie-customer niet aanmaken.' },
+        {
+          error: 'Kon Mollie-customer niet aanmaken.',
+          detail: extractMollieError(e),
+        },
         { status: 502 }
       );
     }
@@ -110,7 +131,10 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error('[checkout] customerPayments.create failed:', e);
     return Response.json(
-      { error: 'Kon betaling niet starten bij Mollie.' },
+      {
+        error: 'Kon betaling niet starten bij Mollie.',
+        detail: extractMollieError(e),
+      },
       { status: 502 }
     );
   }
