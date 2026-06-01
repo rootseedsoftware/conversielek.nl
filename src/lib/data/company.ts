@@ -38,5 +38,5 @@ export const company = {
 
   // Datum van laatste juridische update — handmatig bumpen bij wijzigingen
   // aan privacy of AV zodat gebruikers zien dat er iets veranderd is.
-  legalUpdatedAt: '2026-05-30',
+  legalUpdatedAt: '2026-06-01',
 } as const;

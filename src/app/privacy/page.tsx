@@ -88,7 +88,7 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Met wie delen wij gegevens?</h2>
           <p className="text-slate-700 leading-relaxed mb-3">
-            Wij gebruiken de volgende verwerkers die gegevens kunnen zien voor zover noodzakelijk
+            Wij gebruiken de volgende sub-verwerkers die gegevens kunnen zien voor zover noodzakelijk
             voor hun dienst:
           </p>
           <ul className="list-disc pl-6 text-slate-700 space-y-2">
@@ -97,21 +97,45 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Vercel</strong> (hosting) — verkeer kan via servers buiten de EU lopen. Vercel is
-              gecertificeerd onder het EU-US Data Privacy Framework.
+              gecertificeerd onder het EU-US Data Privacy Framework (DPF).
             </li>
             <li>
-              <strong>Anthropic</strong> (AI-analyse van screenshots) — servers in de Verenigde Staten.
-              Screenshots worden door Anthropic niet gebruikt voor modeltraining (per Anthropic-beleid
-              voor API-klanten).
+              <strong>Anthropic</strong> (AI-analyse van screenshots) — servers in de Verenigde Staten,
+              datatransfer beveiligd via Standard Contractual Clauses (SCC&apos;s). Screenshots worden
+              door Anthropic niet gebruikt voor modeltraining (per Anthropic API-beleid).
+            </li>
+            <li>
+              <strong>Mollie</strong> (betalingsverwerker, alleen voor betalende abonnementen) — gevestigd
+              in Amsterdam, Nederland (EU). Mollie verwerkt jouw betaalgegevens als zelfstandig
+              verantwoordelijke conform haar eigen privacyverklaring.
+            </li>
+            <li>
+              <strong>Resend</strong> (e-mailverzending van transactionele berichten zoals welkom-mails,
+              wachtwoord-reset en audit-rapporten) — servers in de Verenigde Staten, datatransfer
+              beveiligd via SCC&apos;s.
             </li>
           </ul>
           <p className="text-slate-700 leading-relaxed mt-3">
-            Wij verkopen jouw gegevens nooit aan derden voor marketing-doeleinden.
+            De actuele lijst van sub-verwerkers is altijd in te zien op{' '}
+            <Link href="/sub-processors" className="text-orange-600 hover:underline">
+              conversielek.nl/sub-processors
+            </Link>
+            . Wij verkopen jouw gegevens nooit aan derden voor marketing-doeleinden.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Hoe lang bewaren wij gegevens?</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Datalekken</h2>
+          <p className="text-slate-700 leading-relaxed">
+            Bij een datalek dat een hoog risico oplevert voor de rechten en vrijheden van betrokkenen,
+            melden wij dit binnen 72 uur na ontdekking aan de Autoriteit Persoonsgegevens en informeren
+            wij betrokken gebruikers per e-mail, conform artikel 33 en 34 AVG. Onze incident-procedures
+            worden tweejaarlijks geëvalueerd.
+          </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Hoe lang bewaren wij gegevens?</h2>
           <ul className="list-disc pl-6 text-slate-700 space-y-2">
             <li>
               <strong>Account-gegevens:</strong> zolang je account actief is. Bij verwijdering: binnen 30
@@ -132,7 +156,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Jouw rechten</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-3">7. Jouw rechten</h2>
           <p className="text-slate-700 leading-relaxed mb-3">
             Onder de AVG heb je het recht op:
           </p>
@@ -166,7 +190,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">7. Beveiliging</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-3">8. Beveiliging</h2>
           <p className="text-slate-700 leading-relaxed">
             Wij nemen passende technische en organisatorische maatregelen: versleutelde verbindingen
             (TLS/HTTPS), row-level security op database-niveau zodat alleen jij je eigen audits ziet,
@@ -175,7 +199,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">8. Wijzigingen</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-3">9. Wijzigingen</h2>
           <p className="text-slate-700 leading-relaxed">
             Wij kunnen deze verklaring aanpassen. De datum bovenaan toont wanneer de laatste wijziging
             is doorgevoerd. Bij materiële wijzigingen informeren wij ingelogde gebruikers per e-mail.
@@ -183,7 +207,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">9. Contact</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-3">10. Contact</h2>
           <p className="text-slate-700 leading-relaxed">
             {company.legalName}
             <br />
