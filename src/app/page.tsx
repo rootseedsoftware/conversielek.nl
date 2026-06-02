@@ -65,6 +65,7 @@ import { compareAudits } from '@/lib/audit-compare';
 import ScoreRing from '@/app/components/ScoreRing';
 import SeveritySummary from '@/app/components/SeveritySummary';
 import HeroMockup from '@/app/components/HeroMockup';
+import PricingComparison from '@/app/components/PricingComparison';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -1052,6 +1053,9 @@ export default function App() {
             <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-8">
               Alle prijzen excl. BTW. Maandelijks opzegbaar. Geen verborgen kosten.
             </p>
+
+            {/* Uitgebreide feature-vergelijking — beantwoordt "wat krijg ik écht meer voor €19" */}
+            <PricingComparison />
           </div>
         </section>
 
