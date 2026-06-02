@@ -66,6 +66,7 @@ import ScoreRing from '@/app/components/ScoreRing';
 import SeveritySummary from '@/app/components/SeveritySummary';
 import HeroMockup from '@/app/components/HeroMockup';
 import PricingComparison from '@/app/components/PricingComparison';
+import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -1175,19 +1176,15 @@ export default function App() {
               <Loader2 className="w-6 h-6 animate-spin mx-auto text-slate-400 dark:text-slate-500" />
             </div>
           ) : history.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center">
-              <ShoppingCart className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Nog geen audits</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Start je eerste audit en zie hier je geschiedenis.
-              </p>
-              <button
-                onClick={() => setView('audit')}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg font-medium"
-              >
-                Start eerste audit
-              </button>
-            </div>
+            <EmptyState
+              illustration={<IllustrationAudit />}
+              title="Nog geen audits"
+              description="Start je eerste audit van een productpagina of checkout en zie je rapport hier verschijnen. Tussen 30 seconden en een minuut werk."
+              primaryAction={{
+                label: 'Start eerste audit',
+                onClick: () => setView('audit'),
+              }}
+            />
           ) : (
             <>
             <div className="space-y-3">

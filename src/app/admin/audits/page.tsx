@@ -5,6 +5,7 @@
 
 import { requireAdmin } from '@/lib/admin-auth';
 import { listRecentAudits } from '@/lib/admin-queries';
+import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,9 +41,11 @@ export default async function AdminAuditsPage() {
       </header>
 
       {audits.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-          Geen audits gevonden.
-        </div>
+        <EmptyState
+          illustration={<IllustrationAudit />}
+          title="Nog geen audits uitgevoerd"
+          description="Zodra users hun eerste audit starten verschijnen die hier met score, flow-type en gekoppelde webshop-URL."
+        />
       ) : (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">

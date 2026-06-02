@@ -61,8 +61,18 @@ export default async function AdminDashboardPage() {
           Plan-verdeling
         </h2>
         {stats.planDistribution.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-sm text-slate-500 dark:text-slate-400">
-            Nog geen actieve abonnementen.
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 text-sm text-slate-500 dark:text-slate-400 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-500/20 dark:to-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-5 h-5 text-orange-500" />
+            </div>
+            <div>
+              <div className="font-semibold text-slate-700 dark:text-slate-300">
+                Nog geen actieve abonnementen
+              </div>
+              <div className="text-xs">
+                Zodra users upgraden naar Webshop of Agency verschijnt hier de verdeling.
+              </div>
+            </div>
           </div>
         ) : (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100">

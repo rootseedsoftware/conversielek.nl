@@ -6,6 +6,7 @@
 
 import { requireAdmin } from '@/lib/admin-auth';
 import { listAdminUsers } from '@/lib/admin-queries';
+import EmptyState, { IllustrationUsers } from '@/app/components/EmptyState';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -43,9 +44,11 @@ export default async function AdminUsersPage() {
       </header>
 
       {users.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-          Geen users gevonden.
-        </div>
+        <EmptyState
+          illustration={<IllustrationUsers />}
+          title="Nog geen geregistreerde users"
+          description="Zodra iemand een account aanmaakt op conversielek.nl verschijnt die hier met plan en audit-gebruik."
+        />
       ) : (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">

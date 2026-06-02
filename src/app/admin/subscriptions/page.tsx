@@ -8,6 +8,7 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { listAllSubscriptions } from '@/lib/admin-queries';
 import SyncButton from './SyncButton';
+import EmptyState, { IllustrationSubscriptions } from '@/app/components/EmptyState';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -45,9 +46,11 @@ export default async function AdminSubscriptionsPage() {
       </header>
 
       {subs.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-          Geen subscriptions — niemand heeft een checkout gestart.
-        </div>
+        <EmptyState
+          illustration={<IllustrationSubscriptions />}
+          title="Nog geen subscriptions"
+          description="Zodra iemand op 'Start Webshop' of 'Start Agency' klikt komt hier een rij — ook als de checkout halverwege stopt, voor debug-doeleinden."
+        />
       ) : (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
