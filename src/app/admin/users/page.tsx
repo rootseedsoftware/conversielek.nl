@@ -22,7 +22,7 @@ function formatDate(iso: string | null): string {
 }
 
 const planColors: Record<string, string> = {
-  free: 'bg-slate-100 text-slate-700',
+  free: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
   webshop: 'bg-blue-100 text-blue-700',
   agency: 'bg-purple-100 text-purple-700',
 };
@@ -35,22 +35,22 @@ export default async function AdminUsersPage() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Users</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Users</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {users.length} users · gesorteerd op laatste login
           </p>
         </div>
       </header>
 
       {users.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-sm text-slate-500">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
           Geen users gevonden.
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Email</th>
                   <th className="text-left px-4 py-3 font-semibold">Plan</th>
@@ -62,15 +62,15 @@ export default async function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50">
+                  <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-900">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900 break-all">{u.email}</div>
-                      <div className="font-mono text-xs text-slate-400">{u.id.slice(0, 8)}…</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-100 break-all">{u.email}</div>
+                      <div className="font-mono text-xs text-slate-400 dark:text-slate-500">{u.id.slice(0, 8)}…</div>
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          planColors[u.planSlug] ?? 'bg-slate-100 text-slate-700'
+                          planColors[u.planSlug] ?? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                         }`}
                       >
                         {u.planName}
@@ -81,16 +81,16 @@ export default async function AdminUsersPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-900">
+                    <td className="px-4 py-3 text-right font-mono text-slate-900 dark:text-slate-100">
                       {u.auditsThisMonth}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-700">
+                    <td className="px-4 py-3 text-right font-mono text-slate-700 dark:text-slate-300">
                       {u.auditsTotal}
                     </td>
-                    <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                       {formatDate(u.lastSignInAt)}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {formatDate(u.createdAt)}
                     </td>
                   </tr>

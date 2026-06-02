@@ -29,8 +29,8 @@ export default async function AdminPaymentEventsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">Payment events</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Payment events</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           {events.length} events · Mollie webhook-log
         </p>
       </header>
@@ -46,10 +46,10 @@ export default async function AdminPaymentEventsPage() {
           </ul>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Payment ID</th>
                   <th className="text-left px-4 py-3 font-semibold">Event</th>
@@ -60,9 +60,9 @@ export default async function AdminPaymentEventsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {events.map((e) => (
-                  <tr key={e.id} className="hover:bg-slate-50 align-top">
+                  <tr key={e.id} className="hover:bg-slate-50 dark:hover:bg-slate-900 align-top">
                     <td className="px-4 py-3 font-mono text-xs break-all">{e.externalId}</td>
-                    <td className="px-4 py-3 text-slate-700">{e.eventType}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{e.eventType}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {e.processedAt ? (
                         <span className="text-emerald-700 font-medium">
@@ -75,7 +75,7 @@ export default async function AdminPaymentEventsPage() {
                     <td className="px-4 py-3 text-red-700 text-xs max-w-md break-words">
                       {e.error ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {formatDate(e.createdAt)}
                     </td>
                   </tr>

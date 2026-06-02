@@ -18,21 +18,21 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
+      <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-slate-900">{company.tradeName}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{company.tradeName}</span>
           </Link>
         </div>
       </nav>
 
       <article className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-slate-900 mb-3">Contact</h1>
-        <p className="text-slate-600 mb-10">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Contact</h1>
+        <p className="text-slate-600 dark:text-slate-400 mb-10">
           {company.tradeName} is een dienst van {company.legalName}. Hieronder vind je hoe je ons
           kunt bereiken en welke wettelijke bedrijfsgegevens van toepassing zijn.
         </p>
@@ -81,7 +81,7 @@ export default function ContactPage() {
             icon={<MapPin className="w-5 h-5 text-orange-500" />}
             title="Postadres"
             body={
-              <span className="text-slate-700">
+              <span className="text-slate-700 dark:text-slate-300">
                 {company.address.street}
                 <br />
                 {company.address.postalCode} {company.address.city}
@@ -92,28 +92,28 @@ export default function ContactPage() {
           />
         </div>
 
-        <section className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Wettelijke bedrijfsgegevens</h2>
+        <section className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 mb-10">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Wettelijke bedrijfsgegevens</h2>
           <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
             <div>
-              <dt className="text-slate-500">Statutaire naam</dt>
-              <dd className="text-slate-900 font-medium">{company.legalName}</dd>
+              <dt className="text-slate-500 dark:text-slate-400">Statutaire naam</dt>
+              <dd className="text-slate-900 dark:text-slate-100 font-medium">{company.legalName}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Handelsnaam</dt>
-              <dd className="text-slate-900 font-medium">{company.tradeName}</dd>
+              <dt className="text-slate-500 dark:text-slate-400">Handelsnaam</dt>
+              <dd className="text-slate-900 dark:text-slate-100 font-medium">{company.tradeName}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">KvK-nummer</dt>
-              <dd className="text-slate-900 font-medium">{company.kvk}</dd>
+              <dt className="text-slate-500 dark:text-slate-400">KvK-nummer</dt>
+              <dd className="text-slate-900 dark:text-slate-100 font-medium">{company.kvk}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">BTW-nummer</dt>
-              <dd className="text-slate-900 font-medium">{company.btw}</dd>
+              <dt className="text-slate-500 dark:text-slate-400">BTW-nummer</dt>
+              <dd className="text-slate-900 dark:text-slate-100 font-medium">{company.btw}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-slate-500">Vestigingsadres</dt>
-              <dd className="text-slate-900 font-medium">
+              <dt className="text-slate-500 dark:text-slate-400">Vestigingsadres</dt>
+              <dd className="text-slate-900 dark:text-slate-100 font-medium">
                 {company.address.street}, {company.address.postalCode} {company.address.city},{' '}
                 {company.address.country}
               </dd>
@@ -121,8 +121,8 @@ export default function ContactPage() {
           </dl>
         </section>
 
-        <section className="text-sm text-slate-600">
-          <h2 className="text-base font-semibold text-slate-900 mb-2">Klachtenregeling</h2>
+        <section className="text-sm text-slate-600 dark:text-slate-400">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">Klachtenregeling</h2>
           <p className="leading-relaxed">
             Ben je ontevreden over onze dienstverlening? Stuur dan eerst een mail naar{' '}
             <a
@@ -161,13 +161,13 @@ function ContactCard({
   note?: string;
 }) {
   return (
-    <div className="border border-slate-200 rounded-xl p-5 hover:border-orange-300 transition">
+    <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:border-orange-300 transition">
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <h3 className="font-semibold text-slate-900 text-sm">{title}</h3>
+        <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{title}</h3>
       </div>
       <div className="text-sm">{body}</div>
-      {note && <p className="text-xs text-slate-500 mt-1.5">{note}</p>}
+      {note && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{note}</p>}
     </div>
   );
 }

@@ -70,13 +70,13 @@ export default function BillingReturnClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50/30 flex flex-col">
-      <nav className="border-b border-slate-100 bg-white/80 backdrop-blur">
+      <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-slate-900">Conversielek</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">Conversielek</span>
           </Link>
         </div>
       </nav>
@@ -89,10 +89,10 @@ export default function BillingReturnClient() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-50 rounded-full mb-6">
                 <Loader2 className="w-8 h-8 text-orange-600 animate-spin" />
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
                 Bedankt — we controleren je betaling
               </h1>
-              <p className="text-slate-600 mb-8 leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
                 {stage === 'waiting'
                   ? 'We wachten even op de bevestiging van Mollie...'
                   : 'Even kijken bij Mollie of alles binnen is...'}
@@ -105,8 +105,8 @@ export default function BillingReturnClient() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full mb-6">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600" />
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">Gelukt!</h1>
-              <p className="text-slate-600 mb-8 leading-relaxed">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Gelukt!</h1>
+              <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
                 Je abonnement is geactiveerd. We sturen je nu door naar je account...
               </p>
               <Link
@@ -124,10 +124,10 @@ export default function BillingReturnClient() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-50 rounded-full mb-6">
                 <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
                 Mollie verwerkt nog
               </h1>
-              <p className="text-slate-600 mb-6 leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
                 Je betaling is gestart maar Mollie heeft &apos;m nog niet als
                 afgerond bevestigd. Dat kan tot een minuut duren — probeer het zo opnieuw.
               </p>
@@ -141,7 +141,7 @@ export default function BillingReturnClient() {
                 </button>
                 <Link
                   href="/account"
-                  className="inline-flex items-center justify-center gap-2 border border-slate-300 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-lg font-medium transition"
+                  className="inline-flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 px-5 py-2.5 rounded-lg font-medium transition"
                 >
                   Naar mijn account
                 </Link>
@@ -154,10 +154,10 @@ export default function BillingReturnClient() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-50 rounded-full mb-6">
                 <AlertCircle className="w-8 h-8 text-red-600" />
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
                 Activatie hapert
               </h1>
-              <p className="text-slate-600 mb-6 leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
                 We konden de status niet ophalen. Probeer opnieuw of mail ons.
               </p>
               <p className="text-xs text-red-700 font-mono bg-red-50 p-3 rounded-lg mb-6 break-words">
@@ -172,11 +172,11 @@ export default function BillingReturnClient() {
             </>
           )}
 
-          <p className="text-xs text-slate-400 mt-8">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-8">
             Nog problemen?{' '}
             <a
               href="mailto:rootseedsoftware@gmail.com?subject=Activatie+lukt+niet"
-              className="underline hover:text-slate-600"
+              className="underline hover:text-slate-600 dark:hover:text-slate-400"
             >
               Stuur ons een mail
             </a>

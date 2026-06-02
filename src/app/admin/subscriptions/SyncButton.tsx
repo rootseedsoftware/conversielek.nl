@@ -28,7 +28,7 @@ export default function SyncButton({
   };
 
   if (disabled) {
-    return <span className="text-xs text-slate-400 italic">al active</span>;
+    return <span className="text-xs text-slate-400 dark:text-slate-500 italic">al active</span>;
   }
 
   return (

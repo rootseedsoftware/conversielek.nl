@@ -77,7 +77,7 @@ export default function ThemeToggle({ size = 'md' }: { size?: 'sm' | 'md' }) {
       onClick={toggle}
       aria-label={theme === 'dark' ? 'Schakel naar lichte modus' : 'Schakel naar donkere modus'}
       title={theme === 'dark' ? 'Lichte modus' : 'Donkere modus'}
-      className={`${sizeClasses} flex items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition focus:outline-none focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-500/30`}
+      className={`${sizeClasses} flex items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:hover:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition focus:outline-none focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-500/30`}
     >
       {theme === 'dark' ? <Sun className={iconSize} /> : <Moon className={iconSize} />}
     </button>

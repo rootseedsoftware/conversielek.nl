@@ -13,21 +13,21 @@ export const metadata = {
 
 export default function VoorwaardenPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
+      <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-slate-900">{company.tradeName}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{company.tradeName}</span>
           </Link>
         </div>
       </nav>
 
       <article className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Algemene voorwaarden</h1>
-        <p className="text-sm text-slate-500 mb-10">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Algemene voorwaarden</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-10">
           Laatst bijgewerkt: {new Date(company.legalUpdatedAt).toLocaleDateString('nl-NL', {
             year: 'numeric',
             month: 'long',
@@ -36,8 +36,8 @@ export default function VoorwaardenPage() {
         </p>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">1. Definities</h2>
-          <ul className="list-disc pl-6 text-slate-700 space-y-1">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">1. Definities</h2>
+          <ul className="list-disc pl-6 text-slate-700 dark:text-slate-300 space-y-1">
             <li>
               <strong>Aanbieder:</strong> {company.legalName}, KvK {company.kvk}, gevestigd te{' '}
               {company.address.city}.
@@ -57,8 +57,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">2. Toepasselijkheid</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">2. Toepasselijkheid</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Deze voorwaarden zijn van toepassing op alle gebruik van de Dienst. Door een account aan
             te maken of de Dienst te gebruiken accepteert de Gebruiker deze voorwaarden. Afwijkende
             voorwaarden van de Gebruiker worden uitdrukkelijk van de hand gewezen.
@@ -66,14 +66,14 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">3. De Dienst</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">3. De Dienst</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
             De Dienst genereert UX-audits op basis van door de Gebruiker geüploade screenshots,
             gebruikmakend van AI van Anthropic. De audit-output is een hulpmiddel ter inspiratie
             en analyse — geen garantie op specifieke conversie-resultaten of geschiktheid voor een
             specifiek doel.
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Aanbieder behoudt zich het recht voor om de Dienst, de gebruikte AI-modellen, of de
             features op elk moment aan te passen of te beëindigen, met inachtneming van een
             redelijke aankondigingstermijn bij materiële wijzigingen voor betalende gebruikers.
@@ -81,8 +81,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Account en gebruik</h2>
-          <ul className="list-disc pl-6 text-slate-700 space-y-2">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">4. Account en gebruik</h2>
+          <ul className="list-disc pl-6 text-slate-700 dark:text-slate-300 space-y-2">
             <li>De Gebruiker is verantwoordelijk voor de geheimhouding van zijn inloggegevens.</li>
             <li>
               De Gebruiker garandeert dat geüploade screenshots geen rechten van derden schenden en
@@ -100,13 +100,13 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Prijzen en betaling</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">5. Prijzen en betaling</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
             De gratis tier geeft beperkt gebruik zonder kosten. Betaalde abonnementen worden vooraf
             gefactureerd per maand, exclusief BTW. Wijzigingen in prijzen worden minimaal 30 dagen
             van tevoren aangekondigd aan bestaande betalende gebruikers.
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Abonnementen zijn maandelijks opzegbaar tegen het einde van de lopende periode. Reeds
             betaalde maandbedragen worden niet pro-rata gerestitueerd, tenzij sprake is van een
             wezenlijke tekortkoming van de Aanbieder.
@@ -114,8 +114,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Beschikbaarheid</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">6. Beschikbaarheid</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Aanbieder streeft naar maximale beschikbaarheid maar geeft geen uptime-garantie. Onderhoud,
             uitval van externe diensten (zoals Anthropic of Supabase) of overmacht kunnen tijdelijk
             tot onbereikbaarheid leiden. Dit geeft geen recht op restitutie of schadevergoeding.
@@ -123,8 +123,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">7. Intellectueel eigendom</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">7. Intellectueel eigendom</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Alle rechten op de Dienst, de broncode, het ontwerp en de merken berusten bij Aanbieder.
             Door audits te genereren krijgt de Gebruiker een niet-exclusief gebruiksrecht op de
             gegenereerde audit-output voor eigen interne en commerciële doeleinden, inclusief
@@ -133,26 +133,26 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">8. Aansprakelijkheid</h2>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">8. Aansprakelijkheid</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
             Audit-output is een geautomatiseerde analyse en geen vervanging voor professioneel UX-
             of juridisch advies. Aanbieder is niet aansprakelijk voor commerciële beslissingen
             die op basis van de output worden genomen.
           </p>
-          <p className="text-slate-700 leading-relaxed mb-3">
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
             De aansprakelijkheid van Aanbieder is in alle gevallen beperkt tot het bedrag dat de
             Gebruiker in de twaalf maanden voorafgaand aan de schadeveroorzakende gebeurtenis heeft
             betaald voor de Dienst, met een maximum van € 1.000,-.
           </p>
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Indirecte schade, gevolgschade, gederfde winst en omzetverlies zijn altijd uitgesloten.
             Deze beperkingen gelden niet bij opzet of grove schuld van Aanbieder.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">9. Persoonsgegevens</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">9. Persoonsgegevens</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Op de verwerking van persoonsgegevens is onze{' '}
             <Link href="/privacy" className="text-orange-600 hover:underline">
               privacyverklaring
@@ -162,8 +162,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">10. Beëindiging</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">10. Beëindiging</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             De Gebruiker kan zijn Account op elk moment beëindigen via de account-instellingen of
             door een verzoek te sturen aan{' '}
             <a href={`mailto:${company.email.support}`} className="text-orange-600 hover:underline">
@@ -175,8 +175,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">11. Wijzigingen</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">11. Wijzigingen</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Aanbieder mag deze voorwaarden wijzigen. Materiële wijzigingen worden minimaal 30 dagen
             van tevoren aangekondigd aan ingelogde gebruikers. Bij voortgezet gebruik na de
             wijzigingsdatum accepteert de Gebruiker de nieuwe voorwaarden.
@@ -184,8 +184,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">12. Toepasselijk recht en geschillen</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">12. Toepasselijk recht en geschillen</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Op deze voorwaarden is uitsluitend Nederlands recht van toepassing. Geschillen worden
             voorgelegd aan de bevoegde rechter in het arrondissement waar Aanbieder is gevestigd,
             tenzij dwingend recht anders voorschrijft.
@@ -193,8 +193,8 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">13. Contact</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">13. Contact</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             {company.legalName}
             <br />
             {company.address.street}
@@ -212,7 +212,7 @@ export default function VoorwaardenPage() {
           </p>
         </section>
 
-        <p className="text-xs text-slate-400 italic mt-10 border-t border-slate-100 pt-4">
+        <p className="text-xs text-slate-400 dark:text-slate-500 italic mt-10 border-t border-slate-100 dark:border-slate-800 pt-4">
           Deze tekst is een werkbare MVP-template. Voor productie raden wij aan deze door een
           jurist te laten controleren, vooral voordat je betaalde abonnementen activeert.
         </p>

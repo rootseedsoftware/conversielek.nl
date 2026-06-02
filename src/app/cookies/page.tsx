@@ -54,21 +54,21 @@ const cookies: CookieRow[] = [
 
 export default function CookiesPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
+      <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-slate-900">{company.tradeName}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{company.tradeName}</span>
           </Link>
         </div>
       </nav>
 
       <article className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Cookie-policy</h1>
-        <p className="text-sm text-slate-500 mb-10">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Cookie-policy</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-10">
           Laatst bijgewerkt:{' '}
           {new Date(company.legalUpdatedAt).toLocaleDateString('nl-NL', {
             year: 'numeric',
@@ -78,8 +78,8 @@ export default function CookiesPage() {
         </p>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">1. Wat zijn cookies?</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">1. Wat zijn cookies?</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Cookies zijn kleine tekstbestanden die door je browser worden bewaard wanneer je een
             website bezoekt. Wij gebruiken cookies uitsluitend voor het functioneren van de Dienst
             (inloggen, voorkeur-instellingen). Geen tracking, geen analytics, geen advertentie-cookies.
@@ -87,10 +87,10 @@ export default function CookiesPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">2. Welke cookies plaatsen wij?</h2>
-          <div className="overflow-x-auto border border-slate-200 rounded-xl">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">2. Welke cookies plaatsen wij?</h2>
+          <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Cookie</th>
                   <th className="text-left px-4 py-3 font-semibold">Type</th>
@@ -102,11 +102,11 @@ export default function CookiesPage() {
               <tbody className="divide-y divide-slate-100">
                 {cookies.map((c) => (
                   <tr key={c.name} className="align-top">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-900 break-all">{c.name}</td>
-                    <td className="px-4 py-3 text-slate-700 capitalize">{c.type}</td>
-                    <td className="px-4 py-3 text-slate-700">{c.doel}</td>
-                    <td className="px-4 py-3 text-slate-700">{c.retentie}</td>
-                    <td className="px-4 py-3 text-slate-700">{c.partij}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-900 dark:text-slate-100 break-all">{c.name}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 capitalize">{c.type}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{c.doel}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{c.retentie}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{c.partij}</td>
                   </tr>
                 ))}
               </tbody>
@@ -115,8 +115,8 @@ export default function CookiesPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">3. Geen toestemming nodig</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">3. Geen toestemming nodig</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             De cookies hierboven zijn strikt noodzakelijk voor het functioneren van de Dienst en
             vallen daarmee onder de uitzondering van artikel 11.7a lid 3 sub b Telecommunicatiewet.
             Hiervoor is geen voorafgaande toestemming vereist. Mocht je toch geen cookies willen
@@ -126,8 +126,8 @@ export default function CookiesPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Toekomstige analytics</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">4. Toekomstige analytics</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Mochten wij in de toekomst analytics of andere niet-strikt-noodzakelijke cookies
             introduceren, dan vragen wij hiervoor expliciet en vooraf toestemming via een
             cookie-banner. Je kunt die toestemming altijd intrekken via de instellingen in je
@@ -136,12 +136,12 @@ export default function CookiesPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Hoe verwijder ik cookies?</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">5. Hoe verwijder ik cookies?</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Alle browsers bieden de mogelijkheid om cookies te bekijken, te verwijderen of
             volledig te weigeren. Raadpleeg de handleiding van je browser:
           </p>
-          <ul className="list-disc pl-6 text-slate-700 space-y-1 mt-2">
+          <ul className="list-disc pl-6 text-slate-700 dark:text-slate-300 space-y-1 mt-2">
             <li>
               <a
                 href="https://support.google.com/chrome/answer/95647"
@@ -186,8 +186,8 @@ export default function CookiesPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Contact</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">6. Contact</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Vragen over deze cookie-policy? Mail{' '}
             <a
               href={`mailto:${company.email.privacy}`}

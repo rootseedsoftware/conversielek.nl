@@ -54,13 +54,13 @@ export default function CookieBanner() {
 
   return (
     <div className="fixed bottom-4 inset-x-4 z-50 sm:bottom-6 sm:inset-x-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 sm:p-6">
+      <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-5 sm:p-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
             <Cookie className="w-5 h-5 text-orange-600" />
           </div>
-          <div className="text-sm text-slate-700 leading-relaxed">
-            <p className="font-semibold text-slate-900 mb-1">Cookies — kort en eerlijk</p>
+          <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p className="font-semibold text-slate-900 dark:text-slate-100 mb-1">Cookies — kort en eerlijk</p>
             <p>
               We gebruiken alleen functionele cookies om je inlog-sessie te onthouden. Geen
               tracking, geen advertenties, geen verkoop aan derden. Meer in onze{' '}
@@ -75,7 +75,7 @@ export default function CookieBanner() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             onClick={() => save('necessary-only')}
-            className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-900 font-medium text-sm transition"
+            className="px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium text-sm transition"
           >
             Alleen noodzakelijk
           </button>

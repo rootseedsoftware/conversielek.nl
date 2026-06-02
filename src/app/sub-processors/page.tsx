@@ -68,21 +68,21 @@ const subProcessors: SubProcessor[] = [
 
 export default function SubProcessorsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
+      <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-slate-900">{company.tradeName}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{company.tradeName}</span>
           </Link>
         </div>
       </nav>
 
       <article className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Sub-verwerkers</h1>
-        <p className="text-sm text-slate-500 mb-6">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Sub-verwerkers</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           Laatst bijgewerkt:{' '}
           {new Date(company.legalUpdatedAt).toLocaleDateString('nl-NL', {
             year: 'numeric',
@@ -91,16 +91,16 @@ export default function SubProcessorsPage() {
           })}
         </p>
 
-        <p className="text-slate-700 leading-relaxed mb-8">
+        <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-8">
           Hieronder vind je de actuele lijst van sub-verwerkers die {company.legalName} inschakelt
           voor de levering van {company.tradeName}. Wijzigingen worden minimaal 14 dagen van
           tevoren aangekondigd aan betalende klanten per e-mail, waarbij je gelegenheid hebt om
           bezwaar te maken conform artikel 28 lid 2 AVG.
         </p>
 
-        <div className="overflow-x-auto border border-slate-200 rounded-xl">
+        <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Sub-verwerker</th>
                 <th className="text-left px-4 py-3 font-semibold">Doel van verwerking</th>
@@ -112,10 +112,10 @@ export default function SubProcessorsPage() {
             <tbody className="divide-y divide-slate-100">
               {subProcessors.map((sp) => (
                 <tr key={sp.name} className="align-top">
-                  <td className="px-4 py-3 font-medium text-slate-900">{sp.name}</td>
-                  <td className="px-4 py-3 text-slate-700">{sp.doel}</td>
-                  <td className="px-4 py-3 text-slate-700">{sp.locatie}</td>
-                  <td className="px-4 py-3 text-slate-700">{sp.transferBasis}</td>
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{sp.name}</td>
+                  <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{sp.doel}</td>
+                  <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{sp.locatie}</td>
+                  <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{sp.transferBasis}</td>
                   <td className="px-4 py-3">
                     <a
                       href={sp.url}
@@ -133,8 +133,8 @@ export default function SubProcessorsPage() {
         </div>
 
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">Vragen of bezwaar?</h2>
-          <p className="text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Vragen of bezwaar?</h2>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Wil je een verwerkersovereenkomst (DPA) afsluiten of bezwaar maken tegen een
             sub-verwerker? Neem dan contact op via{' '}
             <a href={`mailto:${company.email.legal}`} className="text-orange-600 hover:underline">

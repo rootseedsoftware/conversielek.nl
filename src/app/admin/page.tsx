@@ -19,8 +19,8 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Ingelogd als <span className="font-mono">{adminEmail}</span> · cijfers zijn live (geen cache)
         </p>
       </header>
@@ -56,20 +56,20 @@ export default async function AdminDashboardPage() {
 
       {/* Plan distribution */}
       <section>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-orange-500" />
           Plan-verdeling
         </h2>
         {stats.planDistribution.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 text-sm text-slate-500">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-sm text-slate-500 dark:text-slate-400">
             Nog geen actieve abonnementen.
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100">
             {stats.planDistribution.map((p) => (
               <div key={p.plan} className="px-4 py-3 flex items-center justify-between">
-                <span className="font-medium text-slate-900 capitalize">{p.plan}</span>
-                <span className="text-slate-700 font-mono">{p.count}</span>
+                <span className="font-medium text-slate-900 dark:text-slate-100 capitalize">{p.plan}</span>
+                <span className="text-slate-700 dark:text-slate-300 font-mono">{p.count}</span>
               </div>
             ))}
           </div>
@@ -91,13 +91,13 @@ function StatCard({
   hint?: string;
 }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4">
-      <div className="flex items-center gap-2 text-slate-500 text-xs uppercase tracking-wider font-semibold mb-2">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">
         {icon}
         {label}
       </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
-      {hint && <div className="text-xs text-slate-500 mt-1">{hint}</div>}
+      <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</div>
+      {hint && <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{hint}</div>}
     </div>
   );
 }

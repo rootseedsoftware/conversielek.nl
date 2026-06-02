@@ -20,7 +20,7 @@ function formatDate(iso: string): string {
 }
 
 function scoreColor(score: number | null): string {
-  if (score === null) return 'text-slate-400';
+  if (score === null) return 'text-slate-400 dark:text-slate-500';
   if (score >= 7) return 'text-emerald-600';
   if (score >= 5) return 'text-amber-600';
   return 'text-red-600';
@@ -33,21 +33,21 @@ export default async function AdminAuditsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">Recente audits</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Recente audits</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Laatste {audits.length} audits over alle accounts
         </p>
       </header>
 
       {audits.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-sm text-slate-500">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-sm text-slate-500 dark:text-slate-400">
           Geen audits gevonden.
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Webshop</th>
                   <th className="text-left px-4 py-3 font-semibold">Flow</th>
@@ -58,9 +58,9 @@ export default async function AdminAuditsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {audits.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-50">
+                  <tr key={a.id} className="hover:bg-slate-50 dark:hover:bg-slate-900">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">{a.webshopName}</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-100">{a.webshopName}</div>
                       {a.webshopUrl && (
                         <a
                           href={a.webshopUrl}
@@ -72,12 +72,12 @@ export default async function AdminAuditsPage() {
                         </a>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-700 capitalize">{a.flowType}</td>
-                    <td className="px-4 py-3 text-slate-700 break-all">{a.userEmail}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 capitalize">{a.flowType}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 break-all">{a.userEmail}</td>
                     <td className={`px-4 py-3 text-right font-mono font-bold ${scoreColor(a.score)}`}>
                       {a.score?.toFixed(1) ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {formatDate(a.createdAt)}
                     </td>
                   </tr>

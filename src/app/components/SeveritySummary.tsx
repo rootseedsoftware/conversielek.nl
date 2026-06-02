@@ -54,7 +54,7 @@ export default function SeveritySummary({ issues, onFilter, activeFilter = 'all'
           className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition ${
             activeFilter === 'all'
               ? 'bg-slate-900 text-white border-slate-900'
-              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           Alle <span className="font-mono opacity-70">{total}</span>

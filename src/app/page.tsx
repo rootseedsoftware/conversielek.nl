@@ -87,7 +87,7 @@ function ToastNotification({ toast }: { toast: Toast | null }) {
         className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
           toast.type === 'error'
             ? 'bg-red-50 border-red-200 text-red-900'
-            : 'bg-white border-slate-200 text-slate-900'
+            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100'
         }`}
       >
         {toast.type === 'error' ? (
@@ -493,17 +493,17 @@ export default function App() {
   // ============================================================
   if (view === 'landing') {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white dark:bg-slate-900">
         <ToastNotification toast={toast} />
-        <nav className="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-10">
+        <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-sm">
                 <ShoppingCart className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="font-bold text-slate-900 leading-tight">Conversielek</div>
-                <div className="text-[10px] text-slate-500 leading-tight">
+                <div className="font-bold text-slate-900 dark:text-slate-100 leading-tight">Conversielek</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
                   Voor Nederlandse webshops
                 </div>
               </div>
@@ -512,7 +512,7 @@ export default function App() {
               {history.length > 0 && (
                 <button
                   onClick={() => setView('history')}
-                  className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5"
                 >
                   <Clock className="w-4 h-4" />
                   Mijn audits ({history.length})
@@ -536,14 +536,14 @@ export default function App() {
                 <span className="text-base">🇳🇱</span>
                 Gemaakt voor Nederlandse webshops
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+              <h1 className="text-5xl md:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-6 tracking-tight leading-[1.1]">
                 Ontdek waar je
                 <br />
                 <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
                   conversie weglekt
                 </span>
               </h1>
-              <p className="text-lg lg:text-xl text-slate-600 mb-10 leading-relaxed lg:max-w-xl">
+              <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed lg:max-w-xl">
                 Upload screenshots van je webshop en krijg een conversie-gerichte audit met concrete
                 Nederlandse microcopy, vergeleken met bol.com, Coolblue en Wehkamp.
               </p>
@@ -557,16 +557,16 @@ export default function App() {
                 </button>
                 <button
                   onClick={loadDemoAudit}
-                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 px-6 py-3.5 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                  className="bg-white dark:bg-slate-900 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 px-6 py-3.5 rounded-xl font-medium transition flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
                   Bekijk voorbeeld-audit
                 </button>
               </div>
               {auditCounter > 0 && (
-                <div className="inline-flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-4 py-2 rounded-full">
+                <div className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 px-4 py-2 rounded-full">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
                     {auditCounter.toLocaleString('nl-NL')}
                   </span>{' '}
                   audits uitgevoerd
@@ -581,7 +581,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="border-y border-slate-100 bg-slate-50/50 py-6">
+        <section className="border-y border-slate-100 dark:border-slate-800 bg-slate-50/50 py-6">
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               {[
@@ -592,19 +592,19 @@ export default function App() {
               ].map((u, i) => (
                 <div key={i} className="text-sm">
                   <div className="text-2xl mb-1">{u.icon}</div>
-                  <div className="font-medium text-slate-700">{u.label}</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-300">{u.label}</div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="bg-white py-12 border-b border-slate-100">
+        <section className="bg-white dark:bg-slate-900 py-12 border-b border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto px-6">
-            <p className="text-center text-xs text-slate-500 mb-5 uppercase tracking-wider font-medium">
+            <p className="text-center text-xs text-slate-500 dark:text-slate-400 mb-5 uppercase tracking-wider font-medium">
               Onze audits zijn gebaseerd op
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-slate-500">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-slate-500 dark:text-slate-400">
               {[
                 'Steve Krug',
                 'Baymard Institute',
@@ -622,19 +622,19 @@ export default function App() {
                 </React.Fragment>
               ))}
             </div>
-            <p className="text-center text-xs text-slate-400 mt-4 italic">
+            <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-4 italic">
               Elk advies in onze audits bevat traceerbare bronvermelding
             </p>
           </div>
         </section>
 
         {/* Hoe werkt het — 3 stappen visueel */}
-        <section className="bg-white py-20">
+        <section className="bg-white dark:bg-slate-900 py-20">
           <div className="max-w-5xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+            <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-slate-100 mb-3">
               Zo werkt het — in 3 stappen
             </h2>
-            <p className="text-center text-slate-600 mb-14">
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-14">
               Geen account, geen creditcard. Eerste audit binnen een minuut.
             </p>
             <div className="grid md:grid-cols-3 gap-6 relative">
@@ -670,7 +670,7 @@ export default function App() {
                 return (
                   <div
                     key={step.num}
-                    className="relative bg-white rounded-2xl border border-slate-200 p-6 text-center hover:border-orange-300 hover:shadow-md transition"
+                    className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 text-center hover:border-orange-300 hover:shadow-md transition"
                   >
                     {/* Genummerd circle bovenaan, half overlappend met de card */}
                     <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md ring-4 ring-white">
@@ -679,8 +679,8 @@ export default function App() {
                     <div className="w-12 h-12 mx-auto bg-orange-50 rounded-2xl flex items-center justify-center mt-3 mb-4">
                       <Icon className="w-6 h-6 text-orange-600" />
                     </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{step.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">{step.desc}</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">{step.title}</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{step.desc}</p>
                   </div>
                 );
               })}
@@ -688,12 +688,12 @@ export default function App() {
           </div>
         </section>
 
-        <section className="bg-slate-50 py-20 border-y border-slate-100">
+        <section className="bg-slate-50 dark:bg-slate-900 py-20 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+            <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-slate-100 mb-3">
               Audit elke flow afzonderlijk
             </h2>
-            <p className="text-center text-slate-600 mb-12">
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-12">
               Elke flow heeft eigen heuristieken — focus op wat het meest kost
             </p>
             <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -706,13 +706,13 @@ export default function App() {
                       setFlowType(flow.value);
                       setView('audit');
                     }}
-                    className="group p-6 bg-white rounded-2xl border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all text-left"
+                    className="group p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-orange-300 hover:shadow-lg transition-all text-left"
                   >
                     <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                       <Icon className="w-5 h-5 text-orange-600" />
                     </div>
-                    <h3 className="font-semibold text-slate-900 mb-1">{flow.label}</h3>
-                    <p className="text-xs text-slate-500 mb-3">{flow.desc}</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">{flow.label}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{flow.desc}</p>
                     <div className="text-xs text-orange-600 font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       Start hier <ArrowRight className="w-3 h-3" />
                     </div>
@@ -723,12 +723,12 @@ export default function App() {
           </div>
         </section>
 
-        <section className="bg-white py-20 border-t border-slate-100">
+        <section className="bg-white dark:bg-slate-900 py-20 border-t border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+            <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-slate-100 mb-3">
               Wat krijg je in het rapport?
             </h2>
-            <p className="text-center text-slate-600 mb-12">
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-12">
               Geen UX-jargon. Concrete acties die conversie verhogen.
             </p>
             <div className="grid md:grid-cols-2 gap-6">
@@ -768,13 +768,13 @@ export default function App() {
                 return (
                   <div
                     key={i}
-                    className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-orange-200 transition-colors"
+                    className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-orange-200 transition-colors"
                   >
                     <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mb-3">
                       <Icon className="w-5 h-5 text-orange-600" />
                     </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{feat.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">{feat.desc}</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">{feat.title}</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{feat.desc}</p>
                   </div>
                 );
               })}
@@ -784,12 +784,12 @@ export default function App() {
 
         {/* Testimonials — placeholder-quotes, vervang met echte zodra je ze hebt.
             Bewust 3 cards: bewezen sweet-spot voor scan-baarheid + responsive grid. */}
-        <section className="bg-slate-50 py-20 border-y border-slate-100">
+        <section className="bg-slate-50 dark:bg-slate-900 py-20 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+            <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-slate-100 mb-3">
               Wat webshop-eigenaren zeggen
             </h2>
-            <p className="text-center text-slate-600 mb-12">
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-12">
               Eerlijke feedback uit de eerste rondes met Nederlandse webshops.
             </p>
             <div className="grid md:grid-cols-3 gap-6">
@@ -821,50 +821,50 @@ export default function App() {
               ].map((t) => (
                 <figure
                   key={t.name}
-                  className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col hover:shadow-md transition"
+                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 flex flex-col hover:shadow-md transition"
                 >
                   {/* Quote-mark als decoratief element */}
                   <div className="text-5xl leading-none text-orange-200 font-serif mb-2">
                     &ldquo;
                   </div>
-                  <blockquote className="text-slate-700 leading-relaxed text-sm flex-1 -mt-2">
+                  <blockquote className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm flex-1 -mt-2">
                     {t.quote}
                   </blockquote>
-                  <figcaption className="flex items-center gap-3 mt-5 pt-5 border-t border-slate-100">
+                  <figcaption className="flex items-center gap-3 mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
                     <div
                       className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} text-white flex items-center justify-center text-sm font-semibold flex-shrink-0`}
                     >
                       {t.initials}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-medium text-slate-900 text-sm">{t.name}</div>
-                      <div className="text-xs text-slate-500 truncate">{t.role}</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-100 text-sm">{t.name}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{t.role}</div>
                     </div>
                   </figcaption>
                 </figure>
               ))}
             </div>
-            <p className="text-center text-xs text-slate-400 italic mt-8">
+            <p className="text-center text-xs text-slate-400 dark:text-slate-500 italic mt-8">
               Quotes uit early-access fase — meer reviews zodra we publiekelijk live zijn.
             </p>
           </div>
         </section>
 
-        <section className="bg-white py-20">
+        <section className="bg-white dark:bg-slate-900 py-20">
           <div className="max-w-4xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+            <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-slate-100 mb-3">
               Waarom niet Baymard of Krux?
             </h2>
-            <p className="text-center text-slate-600 mb-12">
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-12">
               Internationale tools missen wat Nederlandse webshops nodig hebben
             </p>
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="text-left p-4 font-semibold text-slate-700">Feature</th>
+                    <th className="text-left p-4 font-semibold text-slate-700 dark:text-slate-300">Feature</th>
                     <th className="text-center p-4 font-semibold text-orange-600">Conversielek</th>
-                    <th className="text-center p-4 font-semibold text-slate-500">Baymard / Krux</th>
+                    <th className="text-center p-4 font-semibold text-slate-500 dark:text-slate-400">Baymard / Krux</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -881,21 +881,21 @@ export default function App() {
                     ] as Array<{ f: string; us: boolean; them: boolean | 'partial' }>
                   ).map((row, i) => (
                     <tr key={i}>
-                      <td className="p-4 text-slate-700">{row.f}</td>
+                      <td className="p-4 text-slate-700 dark:text-slate-300">{row.f}</td>
                       <td className="text-center p-4">
                         {row.us ? (
                           <Check className="w-5 h-5 text-emerald-600 inline" />
                         ) : (
-                          <X className="w-5 h-5 text-slate-300 inline" />
+                          <X className="w-5 h-5 text-slate-300 dark:text-slate-600 inline" />
                         )}
                       </td>
                       <td className="text-center p-4">
                         {row.them === true ? (
                           <Check className="w-5 h-5 text-emerald-600 inline" />
                         ) : row.them === 'partial' ? (
-                          <span className="text-xs text-slate-500">deels</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">deels</span>
                         ) : (
-                          <X className="w-5 h-5 text-slate-300 inline" />
+                          <X className="w-5 h-5 text-slate-300 dark:text-slate-600 inline" />
                         )}
                       </td>
                     </tr>
@@ -907,12 +907,12 @@ export default function App() {
         </section>
 
         {/* Pricing */}
-        <section className="bg-slate-50 py-20 border-y border-slate-100">
+        <section className="bg-slate-50 dark:bg-slate-900 py-20 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+            <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-slate-100 mb-3">
               Eerlijke prijzen
             </h2>
-            <p className="text-center text-slate-600 mb-2">
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-2">
               Start gratis, upgrade als het waarde oplevert
             </p>
             <p className="text-center text-sm text-orange-700 mb-12 font-medium">
@@ -920,18 +920,18 @@ export default function App() {
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               {/* Probeer */}
-              <div className="relative p-8 rounded-2xl border-2 border-slate-200 bg-white flex flex-col">
+              <div className="relative p-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex flex-col">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-slate-900">Probeer</h3>
-                  <p className="text-sm text-slate-500 mt-1">Test het uit</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Probeer</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Test het uit</p>
                 </div>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-slate-900">€0</span>
-                  <span className="text-slate-500 text-sm ml-1">altijd</span>
+                  <span className="text-4xl font-bold text-slate-900 dark:text-slate-100">€0</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">altijd</span>
                 </div>
                 <button
                   onClick={() => setView('audit')}
-                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 hover:bg-slate-200 text-slate-900"
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100"
                 >
                   Start gratis audit
                 </button>
@@ -945,7 +945,7 @@ export default function App() {
                   ].map((feat) => (
                     <li
                       key={feat}
-                      className="flex items-start gap-2 text-sm text-slate-700"
+                      className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
                     >
                       <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                       <span>{feat}</span>
@@ -955,17 +955,17 @@ export default function App() {
               </div>
 
               {/* Webshop (highlighted) */}
-              <div className="relative p-8 rounded-2xl border-2 border-orange-500 shadow-xl shadow-orange-100 bg-white flex flex-col">
+              <div className="relative p-8 rounded-2xl border-2 border-orange-500 shadow-xl shadow-orange-100 bg-white dark:bg-slate-900 flex flex-col">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
                   Aanbevolen
                 </div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-slate-900">Webshop</h3>
-                  <p className="text-sm text-slate-500 mt-1">Voor één webshop</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Webshop</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Voor één webshop</p>
                 </div>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-slate-900">€19</span>
-                  <span className="text-slate-500 text-sm ml-1">/maand</span>
+                  <span className="text-4xl font-bold text-slate-900 dark:text-slate-100">€19</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">/maand</span>
                 </div>
                 <button
                   onClick={() => handleCheckout('webshop')}
@@ -994,7 +994,7 @@ export default function App() {
                   ].map((feat) => (
                     <li
                       key={feat}
-                      className="flex items-start gap-2 text-sm text-slate-700"
+                      className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
                     >
                       <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                       <span>{feat}</span>
@@ -1004,21 +1004,21 @@ export default function App() {
               </div>
 
               {/* Agency */}
-              <div className="relative p-8 rounded-2xl border-2 border-slate-200 bg-white flex flex-col">
+              <div className="relative p-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex flex-col">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-slate-900">Agency</h3>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Agency</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     Voor freelance UX&apos;ers + bureaus
                   </p>
                 </div>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-slate-900">€59</span>
-                  <span className="text-slate-500 text-sm ml-1">/maand</span>
+                  <span className="text-4xl font-bold text-slate-900 dark:text-slate-100">€59</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">/maand</span>
                 </div>
                 <button
                   onClick={() => handleCheckout('agency')}
                   disabled={checkoutLoading !== null}
-                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 text-slate-900 text-center flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl font-medium transition mb-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:bg-slate-50 dark:disabled:bg-slate-900 text-slate-900 dark:text-slate-100 text-center flex items-center justify-center gap-2"
                 >
                   {checkoutLoading === 'agency' ? (
                     <>
@@ -1040,7 +1040,7 @@ export default function App() {
                   ].map((feat) => (
                     <li
                       key={feat}
-                      className="flex items-start gap-2 text-sm text-slate-700"
+                      className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
                     >
                       <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                       <span>{feat}</span>
@@ -1049,36 +1049,36 @@ export default function App() {
                 </ul>
               </div>
             </div>
-            <p className="text-center text-xs text-slate-500 mt-8">
+            <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-8">
               Alle prijzen excl. BTW. Maandelijks opzegbaar. Geen verborgen kosten.
             </p>
           </div>
         </section>
 
-        <section className="bg-white py-20 border-t border-slate-100">
+        <section className="bg-white dark:bg-slate-900 py-20 border-t border-slate-100 dark:border-slate-800">
           <div className="max-w-3xl mx-auto px-6">
             <div className="text-center mb-12">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-50 rounded-xl mb-4">
                 <HelpCircle className="w-6 h-6 text-orange-600" />
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Veelgestelde vragen</h2>
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Veelgestelde vragen</h2>
             </div>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
-                <div key={i} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div key={i} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                   <button
                     onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                    className="w-full px-5 py-4 flex items-center justify-between gap-3 hover:bg-slate-50 transition text-left"
+                    className="w-full px-5 py-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900 transition text-left"
                   >
-                    <span className="font-medium text-slate-900">{faq.q}</span>
+                    <span className="font-medium text-slate-900 dark:text-slate-100">{faq.q}</span>
                     <ChevronDown
-                      className={`w-5 h-5 text-slate-400 flex-shrink-0 transition-transform ${
+                      className={`w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-transform ${
                         expandedFaq === i ? 'rotate-180' : ''
                       }`}
                     />
                   </button>
                   {expandedFaq === i && (
-                    <div className="px-5 pb-4 text-slate-600 text-sm leading-relaxed border-t border-slate-100 pt-3">
+                    <div className="px-5 pb-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
                       {faq.a}
                     </div>
                   )}
@@ -1099,7 +1099,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setView('audit')}
-              className="bg-white text-orange-600 hover:bg-orange-50 px-8 py-3.5 rounded-xl font-semibold transition inline-flex items-center gap-2 shadow-lg"
+              className="bg-white dark:bg-slate-900 text-orange-600 hover:bg-orange-50 px-8 py-3.5 rounded-xl font-semibold transition inline-flex items-center gap-2 shadow-lg"
             >
               Start je gratis audit
               <ArrowRight className="w-4 h-4" />
@@ -1107,8 +1107,8 @@ export default function App() {
           </div>
         </section>
 
-        <footer className="border-t border-slate-100 py-8">
-          <div className="max-w-6xl mx-auto px-6 text-center text-sm text-slate-500">
+        <footer className="border-t border-slate-100 dark:border-slate-800 py-8">
+          <div className="max-w-6xl mx-auto px-6 text-center text-sm text-slate-500 dark:text-slate-400">
             Conversielek.nl · Nederlandse Webshop UX Audit · Gemaakt voor de NL-markt
           </div>
         </footer>
@@ -1121,15 +1121,15 @@ export default function App() {
   // ============================================================
   if (view === 'history') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <ToastNotification toast={toast} />
-        <nav className="border-b border-slate-100 bg-white sticky top-0 z-10">
+        <nav className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
             <button onClick={() => setView('landing')} className="flex items-center gap-2">
               <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-slate-900">Conversielek</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">Conversielek</span>
             </button>
             <div className="flex items-center gap-2">
               {history.length >= 2 && (
@@ -1141,7 +1141,7 @@ export default function App() {
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
                     compareMode
                       ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                      : 'text-slate-600 hover:bg-slate-100'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
                   <GitCompare className="w-4 h-4" />
@@ -1159,8 +1159,8 @@ export default function App() {
         </nav>
 
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Mijn audits</h1>
-          <p className="text-slate-600 mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Mijn audits</h1>
+          <p className="text-slate-600 dark:text-slate-400 mb-8">
             {compareMode
               ? 'Selecteer 2 audits van dezelfde flow (bv. 2× homepage). Mag van dezelfde webshop (voor/na) of van verschillende webshops (benchmark).'
               : 'Je eerder uitgevoerde audits — gegroepeerd per webshop voor vergelijking.'}
@@ -1168,13 +1168,13 @@ export default function App() {
 
           {historyLoading ? (
             <div className="text-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin mx-auto text-slate-400" />
+              <Loader2 className="w-6 h-6 animate-spin mx-auto text-slate-400 dark:text-slate-500" />
             </div>
           ) : history.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-              <ShoppingCart className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Nog geen audits</h3>
-              <p className="text-slate-600 mb-6">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center">
+              <ShoppingCart className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Nog geen audits</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
                 Start je eerste audit en zie hier je geschiedenis.
               </p>
               <button
@@ -1215,12 +1215,12 @@ export default function App() {
                 return (
                   <div
                     key={item.key}
-                    className={`bg-white rounded-xl border p-5 transition group ${
+                    className={`bg-white dark:bg-slate-900 rounded-xl border p-5 transition group ${
                       isSelected
                         ? 'border-orange-400 ring-2 ring-orange-100'
                         : compareMode && !canSelect
-                        ? 'border-slate-200 opacity-40'
-                        : 'border-slate-200 hover:border-orange-300'
+                        ? 'border-slate-200 dark:border-slate-700 opacity-40'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-4">
@@ -1232,7 +1232,7 @@ export default function App() {
                           className={`flex-shrink-0 w-6 h-6 rounded-md border-2 transition flex items-center justify-center ${
                             isSelected
                               ? 'bg-orange-500 border-orange-500'
-                              : 'border-slate-300 bg-white hover:border-orange-400 disabled:cursor-not-allowed'
+                              : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-orange-400 disabled:cursor-not-allowed'
                           }`}
                         >
                           {isSelected && <Check className="w-4 h-4 text-white" />}
@@ -1263,10 +1263,10 @@ export default function App() {
                           {item.audit.overall_score}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-slate-900 truncate">
+                          <div className="font-medium text-slate-900 dark:text-slate-100 truncate">
                             {item.webshopName}
                           </div>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                          <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400">
                             <FlowIcon className="w-3 h-3" />
                             <span>{flow?.label}</span>
                             <span>·</span>
@@ -1279,13 +1279,13 @@ export default function App() {
                           </div>
                         </div>
                         {!compareMode && (
-                          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition" />
+                          <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-orange-500 transition" />
                         )}
                       </button>
                       {!compareMode && (
                         <button
                           onClick={() => deleteAuditFromHistory(item.key)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1344,15 +1344,15 @@ export default function App() {
       });
 
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <ToastNotification toast={toast} />
-        <nav className="border-b border-slate-100 bg-white sticky top-0 z-10">
+        <nav className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10">
           <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
             <button onClick={() => setView('landing')} className="flex items-center gap-2">
               <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-slate-900">Conversielek</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">Conversielek</span>
             </button>
             <button
               onClick={() => {
@@ -1360,7 +1360,7 @@ export default function App() {
                 setCompareRight(null);
                 setView('history');
               }}
-              className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+              className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5"
             >
               <Clock className="w-4 h-4" />
               Terug naar Mijn audits
@@ -1371,28 +1371,28 @@ export default function App() {
         <div className="max-w-5xl mx-auto px-6 py-8">
           {/* Header — verschillende layout afhankelijk van zelfde-shop of cross-shop */}
           <div className="mb-6">
-            <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
+            <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-2">
               <GitCompare className="w-3.5 h-3.5" />
               Vergelijking · {flowLeft?.label}
             </div>
             {compareLeft.webshopName === compareRight.webshopName ? (
               <>
-                <h1 className="text-3xl font-bold text-slate-900 mb-1">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1">
                   {compareLeft.webshopName}
                 </h1>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Voor/na — {fmtDate(compareLeft.timestamp)} →{' '}
                   {fmtDate(compareRight.timestamp)}
                 </p>
               </>
             ) : (
               <>
-                <h1 className="text-3xl font-bold text-slate-900 mb-1">
-                  <span className="text-slate-700">{compareLeft.webshopName}</span>
-                  <span className="text-slate-300 mx-2">vs</span>
-                  <span className="text-slate-700">{compareRight.webshopName}</span>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                  <span className="text-slate-700 dark:text-slate-300">{compareLeft.webshopName}</span>
+                  <span className="text-slate-300 dark:text-slate-600 mx-2">vs</span>
+                  <span className="text-slate-700 dark:text-slate-300">{compareRight.webshopName}</span>
                 </h1>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Benchmark · audits van {fmtDate(compareLeft.timestamp)} en{' '}
                   {fmtDate(compareRight.timestamp)}
                 </p>
@@ -1401,20 +1401,20 @@ export default function App() {
           </div>
 
           {/* Score-diff card */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 mb-6">
-            <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-4 text-center">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 mb-6">
+            <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-4 text-center">
               Score-evolutie
             </div>
             <div className="flex items-center justify-center gap-6 sm:gap-12 flex-wrap">
               <div className="text-center">
-                <div className="text-xs text-slate-500 mb-1">
+                <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">
                   {fmtDate(compareLeft.timestamp)}
                 </div>
                 <div
                   className={`text-5xl font-bold ${getScoreColor(compareLeft.audit.overall_score)}`}
                 >
                   {compareLeft.audit.overall_score}
-                  <span className="text-2xl text-slate-300">/10</span>
+                  <span className="text-2xl text-slate-300 dark:text-slate-600">/10</span>
                 </div>
               </div>
               <div className="flex flex-col items-center">
@@ -1424,7 +1424,7 @@ export default function App() {
                       ? 'text-emerald-600'
                       : scoreDiff < 0
                       ? 'text-red-600'
-                      : 'text-slate-400'
+                      : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
                   {scoreDiff > 0 && <TrendingUp className="w-7 h-7" />}
@@ -1433,17 +1433,17 @@ export default function App() {
                   {scoreDiff > 0 ? '+' : ''}
                   {scoreDiff.toFixed(1)}
                 </div>
-                <div className="text-xs text-slate-500 mt-1">verschil</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">verschil</div>
               </div>
               <div className="text-center">
-                <div className="text-xs text-slate-500 mb-1">
+                <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">
                   {fmtDate(compareRight.timestamp)}
                 </div>
                 <div
                   className={`text-5xl font-bold ${getScoreColor(compareRight.audit.overall_score)}`}
                 >
                   {compareRight.audit.overall_score}
-                  <span className="text-2xl text-slate-300">/10</span>
+                  <span className="text-2xl text-slate-300 dark:text-slate-600">/10</span>
                 </div>
               </div>
             </div>
@@ -1477,26 +1477,26 @@ export default function App() {
             return (
               <div className="grid md:grid-cols-3 gap-4">
                 {/* Bucket 1 — opgelost / alleen bij A */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900 text-sm">
+                      <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                         {labels.resolved.title}
                       </div>
-                      <div className="text-xs text-slate-500">{diff.resolved.length}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{diff.resolved.length}</div>
                     </div>
                   </div>
                   {diff.resolved.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">{labels.resolved.empty}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 italic">{labels.resolved.empty}</p>
                   ) : (
                     <ul className="space-y-2">
                       {diff.resolved.map((issue, i) => (
                         <li
                           key={i}
-                          className={`text-sm text-slate-700 ${
+                          className={`text-sm text-slate-700 dark:text-slate-300 ${
                             sameShop ? 'line-through decoration-emerald-500' : ''
                           }`}
                           title={issue.description}
@@ -1509,24 +1509,24 @@ export default function App() {
                 </div>
 
                 {/* Bucket 2 — blijft bestaan / bij beide */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
                       <Minus className="w-4 h-4 text-orange-600" />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900 text-sm">
+                      <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                         {labels.persisting.title}
                       </div>
-                      <div className="text-xs text-slate-500">{diff.persisting.length}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{diff.persisting.length}</div>
                     </div>
                   </div>
                   {diff.persisting.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">{labels.persisting.empty}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 italic">{labels.persisting.empty}</p>
                   ) : (
                     <ul className="space-y-2">
                       {diff.persisting.map((issue, i) => (
-                        <li key={i} className="text-sm text-slate-700" title={issue.description}>
+                        <li key={i} className="text-sm text-slate-700 dark:text-slate-300" title={issue.description}>
                           {issue.title}
                         </li>
                       ))}
@@ -1535,24 +1535,24 @@ export default function App() {
                 </div>
 
                 {/* Bucket 3 — nieuw / alleen bij B */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
                       <AlertCircle className="w-4 h-4 text-red-600" />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900 text-sm">
+                      <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                         {labels.newIssues.title}
                       </div>
-                      <div className="text-xs text-slate-500">{diff.newIssues.length}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{diff.newIssues.length}</div>
                     </div>
                   </div>
                   {diff.newIssues.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">{labels.newIssues.empty}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 italic">{labels.newIssues.empty}</p>
                   ) : (
                     <ul className="space-y-2">
                       {diff.newIssues.map((issue, i) => (
-                        <li key={i} className="text-sm text-slate-700" title={issue.description}>
+                        <li key={i} className="text-sm text-slate-700 dark:text-slate-300" title={issue.description}>
                           {issue.title}
                         </li>
                       ))}
@@ -1563,7 +1563,7 @@ export default function App() {
             );
           })()}
 
-          <p className="text-center text-xs text-slate-400 mt-8">
+          <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-8">
             Vergelijking gebaseerd op titel-matching. Audits met
             geherformuleerde issues kunnen als &quot;opgelost + nieuw&quot;
             verschijnen i.p.v. &quot;blijft&quot;.
@@ -1582,18 +1582,18 @@ export default function App() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50/30">
         <ToastNotification toast={toast} />
-        <nav className="border-b border-slate-100 bg-white/80 backdrop-blur sticky top-0 z-10">
+        <nav className="border-b border-slate-100 dark:border-slate-800 bg-white/80 backdrop-blur sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
             <button onClick={() => setView('landing')} className="flex items-center gap-2">
               <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-slate-900">Conversielek</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">Conversielek</span>
             </button>
             {history.length > 0 && (
               <button
                 onClick={() => setView('history')}
-                className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5"
               >
                 <Clock className="w-4 h-4" />
                 Mijn audits ({history.length})
@@ -1604,15 +1604,15 @@ export default function App() {
 
         <div className="max-w-3xl mx-auto px-6 py-10">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Audit je webshop</h1>
-            <p className="text-slate-600">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Audit je webshop</h1>
+            <p className="text-slate-600 dark:text-slate-400">
               Kies de flow die je wilt auditen — elke flow heeft eigen heuristieken.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8">
             <div className="mb-8">
-              <label className="block text-sm font-medium text-slate-700 mb-3">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
                 1. Welke flow wil je auditen?
               </label>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
@@ -1626,15 +1626,15 @@ export default function App() {
                       className={`p-3 rounded-xl border-2 text-left transition-all ${
                         isSelected
                           ? 'border-orange-500 bg-orange-50 shadow-sm'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
                       }`}
                     >
                       <Icon
                         className={`w-4 h-4 mb-1.5 ${
-                          isSelected ? 'text-orange-600' : 'text-slate-500'
+                          isSelected ? 'text-orange-600' : 'text-slate-500 dark:text-slate-400'
                         }`}
                       />
-                      <div className="font-medium text-slate-900 text-sm">{flow.label}</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-100 text-sm">{flow.label}</div>
                     </button>
                   );
                 })}
@@ -1643,33 +1643,33 @@ export default function App() {
                 <div className="flex items-start gap-2 text-xs">
                   <FlowIcon className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <div className="font-medium text-slate-700 mb-1">
+                    <div className="font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Wat we checken voor {selectedFlow?.label}:
                     </div>
-                    <div className="text-slate-600">{selectedFlow?.heuristics.join(' · ')}</div>
+                    <div className="text-slate-600 dark:text-slate-400">{selectedFlow?.heuristics.join(' · ')}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mb-8">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 2. Upload screenshots van je {selectedFlow?.label.toLowerCase()}{' '}
-                <span className="text-slate-400 font-normal">— max 5</span>
+                <span className="text-slate-400 dark:text-slate-500 font-normal">— max 5</span>
               </label>
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-orange-400 rounded-xl p-10 text-center cursor-pointer transition-colors bg-slate-50/50 hover:bg-orange-50/50"
+                className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-400 rounded-xl p-10 text-center cursor-pointer transition-colors bg-slate-50/50 hover:bg-orange-50/50"
               >
-                <div className="w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
-                  <Upload className="w-5 h-5 text-slate-600" />
+                <div className="w-12 h-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <Upload className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 </div>
-                <p className="text-sm font-medium text-slate-900 mb-1">
+                <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1">
                   Klik om te uploaden of sleep bestanden hier
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Tip: upload zowel desktop als mobile views voor compleetste audit
                 </p>
                 <input
@@ -1689,7 +1689,7 @@ export default function App() {
                       <img
                         src={screenshot.preview}
                         alt={screenshot.name}
-                        className="w-full h-32 object-cover rounded-lg border border-slate-200"
+                        className="w-full h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700"
                       />
                       <button
                         onClick={() => removeScreenshot(i)}
@@ -1704,40 +1704,40 @@ export default function App() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-3">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
                 3. Over je webshop
               </label>
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1.5">Webshop-naam</label>
+                  <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1.5">Webshop-naam</label>
                   <input
                     type="text"
                     value={webshopName}
                     onChange={(e) => setWebshopName(e.target.value)}
                     placeholder="bv. Bloemen.nl"
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1.5">
-                    URL <span className="text-slate-400">(optioneel)</span>
+                  <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1.5">
+                    URL <span className="text-slate-400 dark:text-slate-500">(optioneel)</span>
                   </label>
                   <input
                     type="url"
                     value={webshopUrl}
                     onChange={(e) => setWebshopUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
                   />
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1.5">Productcategorie</label>
+                  <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1.5">Productcategorie</label>
                   <select
                     value={productCategory}
                     onChange={(e) => setProductCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white text-sm"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white dark:bg-slate-900 text-sm"
                   >
                     {productCategories.map((pc) => (
                       <option key={pc.value} value={pc.value}>
@@ -1747,39 +1747,39 @@ export default function App() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1.5">
-                    Doelgroep <span className="text-slate-400">(optioneel)</span>
+                  <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1.5">
+                    Doelgroep <span className="text-slate-400 dark:text-slate-500">(optioneel)</span>
                   </label>
                   <input
                     type="text"
                     value={targetAudience}
                     onChange={(e) => setTargetAudience(e.target.value)}
                     placeholder="bv. vrouwen 25-45 jr"
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-600 mb-1.5">
+                <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1.5">
                   Wat is je grootste uitdaging?{' '}
-                  <span className="text-slate-400">(optioneel — helpt voor scherpere audit)</span>
+                  <span className="text-slate-400 dark:text-slate-500">(optioneel — helpt voor scherpere audit)</span>
                 </label>
                 <input
                   type="text"
                   value={currentChallenge}
                   onChange={(e) => setCurrentChallenge(e.target.value)}
                   placeholder="bv. veel cart abandonment, lage conversie op mobile..."
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
                 />
               </div>
             </div>
 
             <div className="mb-6 p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-100">
-              <label className="flex items-start gap-2 text-sm font-medium text-slate-700 mb-2">
+              <label className="flex items-start gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-base">📬</span>
                 <div>
                   Ontvang rapport ook per e-mail
-                  <span className="block text-xs text-slate-500 font-normal mt-0.5">
+                  <span className="block text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
                     Optioneel — handig om later terug te kijken
                   </span>
                 </div>
@@ -1789,7 +1789,7 @@ export default function App() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jouw@email.nl"
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm bg-white"
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm bg-white dark:bg-slate-900"
               />
             </div>
 
@@ -1836,20 +1836,20 @@ export default function App() {
   const flow = flowTypes.find((f) => f.value === flowType);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <ToastNotification toast={toast} />
-      <nav className="border-b border-slate-100 bg-white sticky top-0 z-10">
+      <nav className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center flex-wrap gap-2">
           <button onClick={() => setView('landing')} className="flex items-center gap-2">
             <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-slate-900">Conversielek</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">Conversielek</span>
           </button>
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={copyAuditAsText}
-              className="flex items-center gap-1.5 px-3 py-2 text-slate-700 hover:bg-slate-100 rounded-lg text-sm font-medium transition"
+              className="flex items-center gap-1.5 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition"
             >
               {copied ? (
                 <>
@@ -1863,7 +1863,7 @@ export default function App() {
             </button>
             <button
               onClick={downloadPDF}
-              className="flex items-center gap-1.5 px-3 py-2 text-slate-700 hover:bg-slate-100 rounded-lg text-sm font-medium transition"
+              className="flex items-center gap-1.5 px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition"
             >
               <Printer className="w-4 h-4" />
               PDF
@@ -1879,19 +1879,19 @@ export default function App() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="mb-4 flex items-center gap-2 text-sm text-slate-600">
+        <div className="mb-4 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
           {flow && <flow.icon className="w-4 h-4 text-orange-600" />}
-          <span className="font-medium text-slate-900">{webshopName || 'Webshop'}</span>
+          <span className="font-medium text-slate-900 dark:text-slate-100">{webshopName || 'Webshop'}</span>
           <span>·</span>
           <span>{flow?.label} audit</span>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">
           <div className="flex items-start justify-between mb-6 flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <ScoreRing score={audit.overall_score} size={140} />
               <div>
-                <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-2">
                   UX Score
                 </div>
                 <SeveritySummary
@@ -1902,31 +1902,31 @@ export default function App() {
               </div>
             </div>
             <div className="flex-1 min-w-[280px]">
-              <div className="bg-slate-50 rounded-xl p-5">
-                <p className="text-slate-700 leading-relaxed">{audit.summary}</p>
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-5">
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{audit.summary}</p>
               </div>
             </div>
           </div>
 
           {totalIssues > 0 && (
-            <div className="mt-6 pt-6 border-t border-slate-100">
+            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 text-sm">
                   <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  <span className="font-medium text-slate-900">Voortgang</span>
-                  <span className="text-slate-500">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">Voortgang</span>
+                  <span className="text-slate-500 dark:text-slate-400">
                     {resolvedCount} van {totalIssues} opgelost
                   </span>
                 </div>
                 <span
                   className={`text-sm font-bold ${
-                    progressPercent === 100 ? 'text-emerald-600' : 'text-slate-700'
+                    progressPercent === 100 ? 'text-emerald-600' : 'text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   {Math.round(progressPercent)}%
                 </span>
               </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-orange-500 to-emerald-500 transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
@@ -1946,7 +1946,7 @@ export default function App() {
                 <div className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-2">
                   Geschatte conversie-impact
                 </div>
-                <p className="text-lg text-slate-800 font-medium leading-relaxed">
+                <p className="text-lg text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
                   {audit.conversion_impact_estimate}
                 </p>
               </div>
@@ -1955,37 +1955,37 @@ export default function App() {
         )}
 
         {audit.trust_assessment && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                   <Shield className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">Vertrouwen</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Vertrouwen</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Hoe goed bouwt deze webshop vertrouwen op?
                   </p>
                 </div>
               </div>
               <div className={`text-3xl font-bold ${getScoreColor(audit.trust_score)}`}>
                 {audit.trust_score}
-                <span className="text-base text-slate-300">/10</span>
+                <span className="text-base text-slate-300 dark:text-slate-600">/10</span>
               </div>
             </div>
-            <p className="text-slate-700 leading-relaxed">{audit.trust_assessment}</p>
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{audit.trust_assessment}</p>
           </div>
         )}
 
         {audit.nl_specific_checks && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl flex items-center justify-center">
                 <span className="text-xl">🇳🇱</span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Nederlandse webshop-checks</h2>
-                <p className="text-xs text-slate-500">Specifiek voor de NL-markt</p>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Nederlandse webshop-checks</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Specifiek voor de NL-markt</p>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-3">
@@ -1998,12 +1998,12 @@ export default function App() {
                   { key: 'gdpr_cookies', icon: '🍪', label: 'AVG / Cookies' },
                 ] as const
               ).map((check, i) => (
-                <div key={i} className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                <div key={i} className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{check.icon}</span>
-                    <span className="font-semibold text-slate-900 text-sm">{check.label}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{check.label}</span>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     {audit.nl_specific_checks[check.key]}
                   </p>
                 </div>
@@ -2019,8 +2019,8 @@ export default function App() {
                 <Award className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Wat NL-benchmarks beter doen</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Wat NL-benchmarks beter doen</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Concrete voorbeelden uit succesvolle Nederlandse webshops
                 </p>
               </div>
@@ -2032,12 +2032,12 @@ export default function App() {
                   className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-white"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-                    <div className="font-semibold text-slate-900 text-sm">{b.what}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{b.what}</div>
                     <div className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
                       {b.example_shop}
                     </div>
                   </div>
-                  <p className="text-sm text-slate-700 leading-relaxed">{b.why}</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{b.why}</p>
                 </div>
               ))}
             </div>
@@ -2045,12 +2045,12 @@ export default function App() {
         )}
 
         {audit.strengths && audit.strengths.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900">Sterke punten</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Sterke punten</h2>
             </div>
             <ul className="space-y-2">
               {audit.strengths.map((strength, i) => (
@@ -2059,21 +2059,21 @@ export default function App() {
                   className="flex items-start gap-3 p-3 bg-emerald-50/60 rounded-lg border border-emerald-100"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0" />
-                  <span className="text-slate-700">{strength}</span>
+                  <span className="text-slate-700 dark:text-slate-300">{strength}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
               <AlertCircle className="w-5 h-5 text-orange-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Gevonden issues</h2>
-              <p className="text-xs text-slate-500">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Gevonden issues</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {filteredIssues.length === totalIssues
                   ? `${totalIssues} verbeterpunten`
                   : `${filteredIssues.length} van ${totalIssues} getoond`}
@@ -2081,15 +2081,15 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 mb-5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+          <div className="flex flex-wrap items-center gap-2 mb-5 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
               <Filter className="w-3.5 h-3.5" />
               Filter:
             </div>
             <select
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value as SeverityFilter)}
-              className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 bg-white outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+              className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             >
               <option value="all">Alle severities</option>
               <option value="critical">Alleen Kritiek</option>
@@ -2100,7 +2100,7 @@ export default function App() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 bg-white outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+              className="text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             >
               <option value="all">Alle categorieën</option>
               {categories.map((cat) => (
@@ -2124,7 +2124,7 @@ export default function App() {
 
           <div className="space-y-4">
             {filteredIssues.length === 0 ? (
-              <div className="text-center py-8 text-slate-500 text-sm">
+              <div className="text-center py-8 text-slate-500 dark:text-slate-400 text-sm">
                 Geen issues met de huidige filters.
               </div>
             ) : (
@@ -2137,7 +2137,7 @@ export default function App() {
                     key={issue.originalIndex}
                     className={`border rounded-xl p-5 transition-all ${
                       isResolved
-                        ? 'bg-slate-50 border-slate-200 opacity-60'
+                        ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 opacity-60'
                         : `${config.bg} ${config.border}`
                     }`}
                   >
@@ -2147,7 +2147,7 @@ export default function App() {
                         className={`flex-shrink-0 w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center ${
                           isResolved
                             ? 'bg-emerald-600 border-emerald-600'
-                            : 'border-slate-300 hover:border-emerald-500 bg-white'
+                            : 'border-slate-300 dark:border-slate-700 hover:border-emerald-500 bg-white dark:bg-slate-900'
                         }`}
                       >
                         {isResolved && <Check className="w-3.5 h-3.5 text-white" />}
@@ -2157,7 +2157,7 @@ export default function App() {
                           <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${config.text}`} />
                           <div className="flex-1">
                             <h3
-                              className={`font-semibold text-slate-900 mb-2 text-base leading-tight ${
+                              className={`font-semibold text-slate-900 dark:text-slate-100 mb-2 text-base leading-tight ${
                                 isResolved ? 'line-through' : ''
                               }`}
                             >
@@ -2169,11 +2169,11 @@ export default function App() {
                               >
                                 {config.label}
                               </span>
-                              <span className="text-slate-600 font-medium">{issue.category}</span>
+                              <span className="text-slate-600 dark:text-slate-400 font-medium">{issue.category}</span>
                             </div>
                           </div>
                         </div>
-                        <p className="text-slate-700 text-sm mb-3 leading-relaxed">
+                        <p className="text-slate-700 dark:text-slate-300 text-sm mb-3 leading-relaxed">
                           {issue.description}
                         </p>
                         {issue.conversion_impact && (
@@ -2181,16 +2181,16 @@ export default function App() {
                             <div className="text-xs font-bold text-orange-800 mb-1 uppercase tracking-wider flex items-center gap-1">
                               <Euro className="w-3 h-3" /> Conversie-impact
                             </div>
-                            <p className="text-slate-800 text-sm leading-relaxed">
+                            <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">
                               {issue.conversion_impact}
                             </p>
                           </div>
                         )}
-                        <div className="bg-white/80 rounded-lg p-3 mb-2 border border-slate-200">
-                          <div className="text-xs font-bold text-slate-600 mb-1 uppercase tracking-wider">
+                        <div className="bg-white/80 rounded-lg p-3 mb-2 border border-slate-200 dark:border-slate-700">
+                          <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">
                             Aanbeveling
                           </div>
-                          <p className="text-slate-800 text-sm leading-relaxed">
+                          <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">
                             {issue.recommendation}
                           </p>
                         </div>
@@ -2199,14 +2199,14 @@ export default function App() {
                             <div className="text-xs font-bold text-blue-800 mb-1 uppercase tracking-wider">
                               ✏️ Microcopy-suggestie
                             </div>
-                            <p className="text-slate-800 text-sm leading-relaxed italic">
+                            <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed italic">
                               {issue.microcopy_suggestion}
                             </p>
                           </div>
                         )}
                         {issue.sources && issue.sources.length > 0 && (
-                          <div className="bg-slate-50 rounded-lg p-3 mb-2 border border-slate-200">
-                            <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-wider flex items-center gap-1">
+                          <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 mb-2 border border-slate-200 dark:border-slate-700">
+                            <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1">
                               <Library className="w-3 h-3" /> Bronvermelding
                             </div>
                             <div className="space-y-1.5">
@@ -2243,11 +2243,11 @@ export default function App() {
                                         {cfg.label}
                                       </span>
                                       <div className="flex-1 min-w-0">
-                                        <div className="font-semibold text-slate-800">
+                                        <div className="font-semibold text-slate-800 dark:text-slate-200">
                                           {source.name}
                                         </div>
                                         {source.detail && (
-                                          <div className="text-slate-600 mt-0.5 leading-relaxed">
+                                          <div className="text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
                                             {source.detail}
                                           </div>
                                         )}
@@ -2259,7 +2259,7 @@ export default function App() {
                             </div>
                           </div>
                         )}
-                        <div className="text-xs text-slate-500 italic mt-3">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 italic mt-3">
                           Principe: <span className="font-medium">{issue.principle}</span>
                         </div>
                       </div>
@@ -2278,8 +2278,8 @@ export default function App() {
                 <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Quick Wins</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Quick Wins</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Verbeteringen binnen 1 uur die direct conversie kunnen verhogen
                 </p>
               </div>
@@ -2293,14 +2293,14 @@ export default function App() {
                   <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs font-bold flex items-center justify-center shadow-sm">
                     {i + 1}
                   </div>
-                  <span className="text-slate-700 text-sm leading-relaxed mt-0.5">{win}</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mt-0.5">{win}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        <footer className="mt-10 text-center text-xs text-slate-400">
+        <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-500">
           Conversielek.nl · Nederlandse Webshop UX Audit · Gegenereerd op{' '}
           {new Date().toLocaleString('nl-NL')}
         </footer>

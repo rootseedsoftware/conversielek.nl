@@ -61,10 +61,10 @@ export default function MigrateLocalButton() {
       <div className="flex items-start gap-3 mb-3">
         <Upload className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
         <div className="text-sm">
-          <div className="font-medium text-slate-900">
+          <div className="font-medium text-slate-900 dark:text-slate-100">
             {count} {count === 1 ? 'audit' : 'audits'} in deze browser gevonden
           </div>
-          <div className="text-slate-600 mt-1">
+          <div className="text-slate-600 dark:text-slate-400 mt-1">
             Importeer ze naar je account zodat je ze ook op andere apparaten kunt zien.
           </div>
         </div>

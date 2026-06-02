@@ -22,15 +22,15 @@ export default function HeroMockup() {
         className="absolute -inset-4 bg-gradient-to-br from-orange-200/40 via-red-200/30 to-amber-200/40 rounded-3xl blur-2xl"
       />
 
-      <div className="relative bg-white rounded-2xl shadow-2xl shadow-orange-500/10 border border-slate-200 overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl shadow-orange-500/10 border border-slate-200 dark:border-slate-700 overflow-hidden">
         {/* Browser-frame chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-100">
+        <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
           <div className="flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
             <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
-          <div className="flex-1 mx-2 px-3 py-1 bg-white rounded-md border border-slate-200 text-[10px] text-slate-400 font-mono truncate">
+          <div className="flex-1 mx-2 px-3 py-1 bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700 text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate">
             conversielek.nl/audit
           </div>
         </div>
@@ -43,11 +43,11 @@ export default function HeroMockup() {
               <ScoreRing score={6.4} size={96} strokeWidth={9} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">
                 UX Score
               </div>
-              <div className="text-sm font-bold text-slate-900 mb-1">Voldoende</div>
-              <div className="text-xs text-slate-600 leading-snug">
+              <div className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Voldoende</div>
+              <div className="text-xs text-slate-600 dark:text-slate-400 leading-snug">
                 Sterke productpagina&apos;s, maar checkout verliest vertrouwen door
                 weggestopte iDEAL-knop.
               </div>
@@ -114,7 +114,7 @@ export default function HeroMockup() {
           </div>
 
           {/* Voettekst van de mockup */}
-          <div className="text-[10px] text-slate-400 text-center mt-3 pt-3 border-t border-slate-100">
+          <div className="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             Voorbeeld-rapport · echte audits zijn 30-50 issues
           </div>
         </div>

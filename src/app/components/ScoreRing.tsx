@@ -78,7 +78,7 @@ export default function ScoreRing({ score, size = 160, strokeWidth = 12 }: Props
         <div className={`text-5xl font-bold leading-none ${colors.text}`}>
           {clamped.toFixed(1).replace('.0', '')}
         </div>
-        <div className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">
+        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 uppercase tracking-wider">
           /10
         </div>
       </div>
