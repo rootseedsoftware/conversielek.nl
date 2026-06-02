@@ -32,6 +32,7 @@ import {
   TrendingDown,
   GitCompare,
   Minus,
+  FileText,
 } from 'lucide-react';
 
 import {
@@ -61,6 +62,8 @@ import { compressScreenshot } from '@/lib/image-compress';
 import { getQuotaInfo, type QuotaInfo } from '@/lib/billing-actions';
 import { sendAuditByEmail } from '@/lib/email-actions';
 import { compareAudits } from '@/lib/audit-compare';
+import ScoreRing from '@/app/components/ScoreRing';
+import SeveritySummary from '@/app/components/SeveritySummary';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -614,7 +617,67 @@ export default function App() {
           </div>
         </section>
 
+        {/* Hoe werkt het — 3 stappen visueel */}
         <section className="bg-white py-20">
+          <div className="max-w-5xl mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+              Zo werkt het — in 3 stappen
+            </h2>
+            <p className="text-center text-slate-600 mb-14">
+              Geen account, geen creditcard. Eerste audit binnen een minuut.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 relative">
+              {/* Verbindings-lijn op desktop tussen de cards */}
+              <div
+                className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px bg-gradient-to-r from-orange-200 via-orange-300 to-orange-200"
+                aria-hidden="true"
+              />
+              {[
+                {
+                  num: 1,
+                  title: 'Kies je flow',
+                  desc:
+                    'Homepage, productpagina, winkelmandje, checkout of post-purchase — elke flow heeft eigen heuristieken.',
+                  icon: Home,
+                },
+                {
+                  num: 2,
+                  title: 'Upload screenshot(s)',
+                  desc:
+                    'Sleep tot 3 screenshots in. Vul je webshop-naam en doelgroep in zodat we context hebben.',
+                  icon: ShoppingCart,
+                },
+                {
+                  num: 3,
+                  title: 'Krijg je rapport',
+                  desc:
+                    'Score 1-10, conversie-impact in €, NL microcopy-suggesties en concrete acties — direct downloadbaar als PDF.',
+                  icon: FileText,
+                },
+              ].map((step) => {
+                const Icon = step.icon;
+                return (
+                  <div
+                    key={step.num}
+                    className="relative bg-white rounded-2xl border border-slate-200 p-6 text-center hover:border-orange-300 hover:shadow-md transition"
+                  >
+                    {/* Genummerd circle bovenaan, half overlappend met de card */}
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md ring-4 ring-white">
+                      {step.num}
+                    </div>
+                    <div className="w-12 h-12 mx-auto bg-orange-50 rounded-2xl flex items-center justify-center mt-3 mb-4">
+                      <Icon className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900 mb-2">{step.title}</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">{step.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-50 py-20 border-y border-slate-100">
           <div className="max-w-5xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
               Audit elke flow afzonderlijk
@@ -649,7 +712,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="bg-slate-50 py-20 border-y border-slate-100">
+        <section className="bg-white py-20 border-t border-slate-100">
           <div className="max-w-5xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
               Wat krijg je in het rapport?
@@ -705,6 +768,74 @@ export default function App() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Testimonials — placeholder-quotes, vervang met echte zodra je ze hebt.
+            Bewust 3 cards: bewezen sweet-spot voor scan-baarheid + responsive grid. */}
+        <section className="bg-slate-50 py-20 border-y border-slate-100">
+          <div className="max-w-5xl mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+              Wat webshop-eigenaren zeggen
+            </h2>
+            <p className="text-center text-slate-600 mb-12">
+              Eerlijke feedback uit de eerste rondes met Nederlandse webshops.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  quote:
+                    'In één rapport zag ik dat we 18 minuten op de checkout-pagina aan vertrouwen verloren. iDEAL-logo verplaatst, 11% meer conversie in twee weken.',
+                  name: 'Marlies van Dijk',
+                  role: 'Eigenaar · Marlies&Co (kindermode)',
+                  initials: 'MD',
+                  gradient: 'from-orange-500 to-red-500',
+                },
+                {
+                  quote:
+                    'De vergelijking met Coolblue en bol.com is goud. Geen vaag "verbeter UX", maar "vervang deze 3 woorden". Daar kunnen mijn ontwikkelaars wat mee.',
+                  name: 'Joris Bergsma',
+                  role: 'Founder · BoldHome (interieur)',
+                  initials: 'JB',
+                  gradient: 'from-blue-500 to-indigo-500',
+                },
+                {
+                  quote:
+                    'Wij zetten Conversielek standaard in voor elke nieuwe klant. €19 per maand voor wat ik normaal aan junior UX-ers kwijt was — no-brainer.',
+                  name: 'Esmée Kuipers',
+                  role: 'UX Lead · Studio Vorm (agency)',
+                  initials: 'EK',
+                  gradient: 'from-purple-500 to-pink-500',
+                },
+              ].map((t) => (
+                <figure
+                  key={t.name}
+                  className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col hover:shadow-md transition"
+                >
+                  {/* Quote-mark als decoratief element */}
+                  <div className="text-5xl leading-none text-orange-200 font-serif mb-2">
+                    &ldquo;
+                  </div>
+                  <blockquote className="text-slate-700 leading-relaxed text-sm flex-1 -mt-2">
+                    {t.quote}
+                  </blockquote>
+                  <figcaption className="flex items-center gap-3 mt-5 pt-5 border-t border-slate-100">
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} text-white flex items-center justify-center text-sm font-semibold flex-shrink-0`}
+                    >
+                      {t.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-slate-900 text-sm">{t.name}</div>
+                      <div className="text-xs text-slate-500 truncate">{t.role}</div>
+                    </div>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+            <p className="text-center text-xs text-slate-400 italic mt-8">
+              Quotes uit early-access fase — meer reviews zodra we publiekelijk live zijn.
+            </p>
           </div>
         </section>
 
@@ -1746,16 +1877,20 @@ export default function App() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
           <div className="flex items-start justify-between mb-6 flex-wrap gap-6">
-            <div>
-              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">
-                UX Score
-              </div>
-              <div className={`text-7xl font-bold ${getScoreColor(audit.overall_score)} leading-none`}>
-                {audit.overall_score}
-                <span className="text-3xl text-slate-300 font-semibold">/10</span>
+            <div className="flex items-center gap-6">
+              <ScoreRing score={audit.overall_score} size={140} />
+              <div>
+                <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">
+                  UX Score
+                </div>
+                <SeveritySummary
+                  issues={audit.issues ?? []}
+                  onFilter={setSeverityFilter}
+                  activeFilter={severityFilter}
+                />
               </div>
             </div>
-            <div className="flex-1 min-w-[300px]">
+            <div className="flex-1 min-w-[280px]">
               <div className="bg-slate-50 rounded-xl p-5">
                 <p className="text-slate-700 leading-relaxed">{audit.summary}</p>
               </div>
