@@ -64,6 +64,7 @@ import { sendAuditByEmail } from '@/lib/email-actions';
 import { compareAudits } from '@/lib/audit-compare';
 import ScoreRing from '@/app/components/ScoreRing';
 import SeveritySummary from '@/app/components/SeveritySummary';
+import HeroMockup from '@/app/components/HeroMockup';
 
 // ---- Local types -----------------------------------------------------------
 
@@ -527,47 +528,57 @@ export default function App() {
           </div>
         </nav>
 
-        <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
-          <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            <span className="text-base">🇳🇱</span>
-            Gemaakt voor Nederlandse webshops
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-[1.1]">
-            Ontdek waar je
-            <br />
-            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              conversie weglekt
-            </span>
-          </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Upload screenshots van je webshop en krijg een conversie-gerichte audit met concrete
-            Nederlandse microcopy, vergeleken met bol.com, Coolblue en Wehkamp.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-            <button
-              onClick={() => setView('audit')}
-              className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3.5 rounded-xl font-medium transition flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10"
-            >
-              Start gratis audit
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={loadDemoAudit}
-              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 px-6 py-3.5 rounded-xl font-medium transition flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              Bekijk voorbeeld-audit
-            </button>
-          </div>
-          {auditCounter > 0 && (
-            <div className="inline-flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-4 py-2 rounded-full">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="font-medium text-slate-700">
-                {auditCounter.toLocaleString('nl-NL')}
-              </span>{' '}
-              audits uitgevoerd
+        <section className="max-w-6xl mx-auto px-6 pt-16 pb-16">
+          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
+            {/* LEFT: copy + CTAs */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+                <span className="text-base">🇳🇱</span>
+                Gemaakt voor Nederlandse webshops
+              </div>
+              <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+                Ontdek waar je
+                <br />
+                <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                  conversie weglekt
+                </span>
+              </h1>
+              <p className="text-lg lg:text-xl text-slate-600 mb-10 leading-relaxed lg:max-w-xl">
+                Upload screenshots van je webshop en krijg een conversie-gerichte audit met concrete
+                Nederlandse microcopy, vergeleken met bol.com, Coolblue en Wehkamp.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-8">
+                <button
+                  onClick={() => setView('audit')}
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3.5 rounded-xl font-medium transition flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10"
+                >
+                  Start gratis audit
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={loadDemoAudit}
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 px-6 py-3.5 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Bekijk voorbeeld-audit
+                </button>
+              </div>
+              {auditCounter > 0 && (
+                <div className="inline-flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-4 py-2 rounded-full">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium text-slate-700">
+                    {auditCounter.toLocaleString('nl-NL')}
+                  </span>{' '}
+                  audits uitgevoerd
+                </div>
+              )}
             </div>
-          )}
+
+            {/* RIGHT: mockup van het rapport (verbergt op mobile? nee, toont onder hero) */}
+            <div className="lg:pl-4">
+              <HeroMockup />
+            </div>
+          </div>
         </section>
 
         <section className="border-y border-slate-100 bg-slate-50/50 py-6">
