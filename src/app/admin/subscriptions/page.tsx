@@ -7,6 +7,7 @@
 
 import { requireAdmin } from '@/lib/admin-auth';
 import { listAllSubscriptions } from '@/lib/admin-queries';
+import SyncButton from './SyncButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -59,6 +60,7 @@ export default async function AdminSubscriptionsPage() {
                   <th className="text-left px-4 py-3 font-semibold">Mollie IDs</th>
                   <th className="text-left px-4 py-3 font-semibold">Periode-einde</th>
                   <th className="text-left px-4 py-3 font-semibold">Aangemaakt</th>
+                  <th className="text-left px-4 py-3 font-semibold">Actie</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -94,6 +96,12 @@ export default async function AdminSubscriptionsPage() {
                     </td>
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
                       {formatDate(s.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <SyncButton
+                        subscriptionId={s.id}
+                        disabled={s.status === 'active'}
+                      />
                     </td>
                   </tr>
                 ))}
