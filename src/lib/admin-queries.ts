@@ -65,6 +65,31 @@ export type AdminAuditRow = {
   score: number | null;
 };
 
+export type AdminSubscriptionRow = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  planSlug: string;
+  planName: string;
+  status: string;
+  mollieCustomerId: string | null;
+  mollieSubscriptionId: string | null;
+  currentPeriodStart: string;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+};
+
+export type AdminPaymentEventRow = {
+  id: string;
+  provider: string;
+  externalId: string;
+  eventType: string;
+  processedAt: string | null;
+  error: string | null;
+  createdAt: string;
+};
+
 // ---- Dashboard -------------------------------------------------------------
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -154,27 +179,32 @@ export async function listAdminUsers(opts?: { limit?: number }): Promise<AdminUs
 
   const userIds = users.map((u) => u.id);
 
-  // 2. Subscriptions per user (parallel)
+  // 2. Subscriptions per user — join op plans want subscriptions heeft alleen
+  //    plan_id (FK), niet plan_slug. Eerdere bug: queryde plan_slug direct
+  //    → query faalde silent → ALLE users zagen 'free'.
   const subsRes = await admin
     .from('subscriptions')
-    .select('user_id, plan_slug, status, cancel_at_period_end')
+    .select('user_id, status, cancel_at_period_end, plan:plans(slug)')
     .in('user_id', userIds);
 
   const subsByUser = new Map<
     string,
     { planSlug: string; status: string; cancelAtPeriodEnd: boolean }
   >();
-  for (const s of (subsRes.data ?? []) as Array<{
+  type SubRow = {
     user_id: string;
-    plan_slug: string;
     status: string;
     cancel_at_period_end: boolean;
-  }>) {
-    // Bij meerdere subs: laatste actieve telt (active > anders eerste)
+    plan: { slug: string } | { slug: string }[] | null;
+  };
+  for (const s of (subsRes.data ?? []) as unknown as SubRow[]) {
+    const planRow = Array.isArray(s.plan) ? s.plan[0] : s.plan;
+    if (!planRow) continue;
+    // Bij meerdere subs: prefer 'active' > 'incomplete' > anders eerste
     const existing = subsByUser.get(s.user_id);
     if (!existing || s.status === 'active') {
       subsByUser.set(s.user_id, {
-        planSlug: s.plan_slug,
+        planSlug: planRow.slug,
         status: s.status,
         cancelAtPeriodEnd: s.cancel_at_period_end,
       });
@@ -281,5 +311,121 @@ export async function listRecentAudits(opts?: { limit?: number }): Promise<Admin
     webshopUrl: a.webshop_url,
     flowType: a.flow_type,
     score: a.audit?.score ?? null,
+  }));
+}
+
+// ---- Subscriptions ---------------------------------------------------------
+
+/**
+ * Alle subscriptions ongeacht status — voor debug van betalingsflow.
+ * Toont 'incomplete' subs zodat je ziet of een checkout is gestart maar
+ * de webhook niet is aangekomen.
+ */
+export async function listAllSubscriptions(opts?: {
+  limit?: number;
+}): Promise<AdminSubscriptionRow[]> {
+  const admin = createAdminClient();
+  const limit = opts?.limit ?? 100;
+
+  const subsRes = await admin
+    .from('subscriptions')
+    .select(
+      `
+      id,
+      user_id,
+      status,
+      mollie_customer_id,
+      mollie_subscription_id,
+      current_period_start,
+      current_period_end,
+      cancel_at_period_end,
+      created_at,
+      plan:plans(slug, name)
+    `
+    )
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  type Row = {
+    id: string;
+    user_id: string;
+    status: string;
+    mollie_customer_id: string | null;
+    mollie_subscription_id: string | null;
+    current_period_start: string;
+    current_period_end: string | null;
+    cancel_at_period_end: boolean;
+    created_at: string;
+    plan: { slug: string; name: string } | { slug: string; name: string }[] | null;
+  };
+
+  const rows = (subsRes.data ?? []) as unknown as Row[];
+  if (rows.length === 0) return [];
+
+  // Email-lookup
+  const userIds = Array.from(new Set(rows.map((r) => r.user_id)));
+  const emails = new Map<string, string>();
+  const allUsers = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  for (const u of allUsers.data?.users ?? []) {
+    if (userIds.includes(u.id) && u.email) emails.set(u.id, u.email);
+  }
+
+  return rows.map((r) => {
+    const planRow = Array.isArray(r.plan) ? r.plan[0] : r.plan;
+    return {
+      id: r.id,
+      userId: r.user_id,
+      userEmail: emails.get(r.user_id) ?? '(onbekend)',
+      planSlug: planRow?.slug ?? '(geen plan)',
+      planName: planRow?.name ?? '(geen plan)',
+      status: r.status,
+      mollieCustomerId: r.mollie_customer_id,
+      mollieSubscriptionId: r.mollie_subscription_id,
+      currentPeriodStart: r.current_period_start,
+      currentPeriodEnd: r.current_period_end,
+      cancelAtPeriodEnd: r.cancel_at_period_end,
+      createdAt: r.created_at,
+    } satisfies AdminSubscriptionRow;
+  });
+}
+
+// ---- Payment events --------------------------------------------------------
+
+/**
+ * Alle Mollie webhook events. Cruciaal voor debug: als deze leeg is, is
+ * Mollie's webhook NOOIT bij ons aangekomen → check Mollie dashboard +
+ * webhookUrl. Als wel rijen maar geen processed_at → handler crashte;
+ * error-kolom toont waarom.
+ */
+export async function listPaymentEvents(opts?: {
+  limit?: number;
+}): Promise<AdminPaymentEventRow[]> {
+  const admin = createAdminClient();
+  const limit = opts?.limit ?? 100;
+
+  const res = await admin
+    .from('payment_events')
+    .select('id, provider, external_id, event_type, processed_at, error, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  type Row = {
+    id: string;
+    provider: string;
+    external_id: string;
+    event_type: string;
+    processed_at: string | null;
+    error: string | null;
+    created_at: string;
+  };
+
+  return ((res.data ?? []) as Row[]).map((r) => ({
+    id: r.id,
+    provider: r.provider,
+    externalId: r.external_id,
+    eventType: r.event_type,
+    processedAt: r.processed_at,
+    error: r.error,
+    createdAt: r.created_at,
   }));
 }

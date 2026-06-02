@@ -7,7 +7,15 @@
 // render iemand het bestaan van /admin verraadt.
 
 import Link from 'next/link';
-import { ShoppingCart, LayoutDashboard, Users, FileSearch, ArrowLeft } from 'lucide-react';
+import {
+  ShoppingCart,
+  LayoutDashboard,
+  Users,
+  FileSearch,
+  CreditCard,
+  Receipt,
+  ArrowLeft,
+} from 'lucide-react';
 
 export const metadata = {
   title: 'Admin — Conversielek',
@@ -37,6 +45,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </AdminNavLink>
               <AdminNavLink href="/admin/audits" icon={<FileSearch className="w-3.5 h-3.5" />}>
                 Audits
+              </AdminNavLink>
+              <AdminNavLink
+                href="/admin/subscriptions"
+                icon={<CreditCard className="w-3.5 h-3.5" />}
+              >
+                Subscriptions
+              </AdminNavLink>
+              <AdminNavLink
+                href="/admin/payment-events"
+                icon={<Receipt className="w-3.5 h-3.5" />}
+              >
+                Events
               </AdminNavLink>
             </div>
           </div>
