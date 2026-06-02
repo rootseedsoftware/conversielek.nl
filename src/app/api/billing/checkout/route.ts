@@ -110,7 +110,19 @@ export async function POST(req: NextRequest) {
   const host = req.headers.get('host') ?? 'conversielek.nl';
   const origin = `${proto}://${host}`;
 
-  // 6. Create first payment (mandate-vesting)
+  // 6. Create payment.
+  //
+  // Mollie test-mode quirk: in test mode is sequenceType:first niet
+  // beschikbaar (iDEAL+SEPA-mandate vereist een gevalideerd LIVE-profiel).
+  // /api/billing/diagnose toont {recurringMethods.count: 0} als bewijs.
+  //
+  // Workaround: bij test-key → sequenceType:oneoff zodat we de hele flow
+  // eind-to-end kunnen testen. Geen recurring mandate; webhook activeert
+  // de subscription voor 1 maand. Bij live-key (test_ → live_ na KvK-
+  // verificatie) gaat alles automatisch terug naar first+recurring.
+  const isTestMode = (process.env.MOLLIE_API_KEY ?? '').startsWith('test_');
+  const sequenceType = isTestMode ? SequenceType.oneoff : SequenceType.first;
+
   let payment;
   try {
     payment = await mollie.customerPayments.create({
@@ -119,8 +131,10 @@ export async function POST(req: NextRequest) {
         currency: plan.currency,
         value: (plan.price_cents / 100).toFixed(2),
       },
-      description: `${plan.name} — eerste maand`,
-      sequenceType: SequenceType.first,
+      description: isTestMode
+        ? `${plan.name} — testbetaling (geen recurring)`
+        : `${plan.name} — eerste maand`,
+      sequenceType,
       redirectUrl: `${origin}/billing/return`,
       webhookUrl: `${origin}/api/billing/webhook`,
       metadata: {

@@ -93,6 +93,11 @@ export async function POST(req: NextRequest) {
     if (payment.status === 'paid') {
       if (payment.sequenceType === SequenceType.first && payment.customerId) {
         await handleFirstPaymentPaid(payment, admin, mollie, req);
+      } else if (payment.sequenceType === SequenceType.oneoff) {
+        // Test-mode workaround: checkout-route gebruikt 'oneoff' in test mode
+        // omdat Mollie test geen first-payments toelaat zonder live profiel.
+        // Activeer de incomplete subscription voor 1 maand zonder recurring.
+        await handleOneoffPaymentPaid(payment, admin);
       } else if (payment.subscriptionId) {
         await handleRecurringPaymentPaid(payment.subscriptionId, admin);
       }
@@ -208,6 +213,70 @@ async function handleFirstPaymentPaid(
       status: 'active',
       mollie_customer_id: customerId,
       mollie_subscription_id: sub.id,
+      current_period_start: new Date().toISOString(),
+      current_period_end: periodEnd.toISOString(),
+    });
+  }
+}
+
+/**
+ * Test-mode flow: oneoff payment is binnen → activeer subscription voor
+ * 1 maand zonder recurring mandate (geen mollie_subscription_id).
+ *
+ * Belangrijk: dit pad ALLEEN actief in test mode (zie checkout-route).
+ * In live mode komt oneoff niet voor — dan is alles sequenceType: first.
+ *
+ * Na 1 maand verloopt de sub stilletjes (current_period_end < now). User
+ * moet dan handmatig opnieuw betalen — maar dat is OK want test mode.
+ */
+async function handleOneoffPaymentPaid(
+  payment: Payment,
+  admin: ReturnType<typeof createAdminClient>
+) {
+  const metadata = (payment.metadata ?? {}) as {
+    plan_slug?: string;
+    supabase_user_id?: string;
+  };
+  const planSlug = metadata.plan_slug;
+  const userId = metadata.supabase_user_id;
+  const customerId = payment.customerId;
+
+  if (!planSlug || !userId) {
+    console.warn(
+      `[webhook oneoff] payment ${payment.id} mist metadata — skip activatie`
+    );
+    return;
+  }
+
+  const { data: plan } = await admin
+    .from('plans')
+    .select('id, name, slug')
+    .eq('slug', planSlug)
+    .single();
+  if (!plan) throw new Error(`Plan slug "${planSlug}" niet gevonden`);
+
+  const periodEnd = new Date();
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+  // Probeer eerst de incomplete sub-record te upgraden (normale flow)
+  const { data: updated } = await admin
+    .from('subscriptions')
+    .update({
+      status: 'active',
+      current_period_end: periodEnd.toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+    .eq('status', 'incomplete')
+    .select('id');
+
+  if (!updated || updated.length === 0) {
+    // Edge-case: geen incomplete record — insert direct
+    await admin.from('subscriptions').insert({
+      user_id: userId,
+      plan_id: plan.id,
+      status: 'active',
+      mollie_customer_id: customerId,
       current_period_start: new Date().toISOString(),
       current_period_end: periodEnd.toISOString(),
     });
