@@ -126,3 +126,97 @@ export async function cancelSubscription() {
       )
   );
 }
+
+/**
+ * Mollie-sync voor de ingelogde user — zoekt alle incomplete subscriptions
+ * van deze user, checkt bij Mollie of er paid payments zijn, activeert die
+ * lokaal. Webhook-onafhankelijk.
+ *
+ * Wordt aangeroepen vanuit /billing/return zodat de user direct na de
+ * Mollie checkout de juiste status ziet, ook als Mollie's webhook nog niet
+ * (of nooit) bij ons aankomt.
+ *
+ * Verschil met admin-actions.syncSubscriptionFromMollie:
+ *   - Geen requireAdmin — gebruikt user-session in plaats
+ *   - Filtert strikt op user_id (kan niemand anders' sub triggeren)
+ *   - Loopt over ALLE incomplete subs van user, niet één specifieke id
+ */
+export async function syncMyPendingSubscription(): Promise<{
+  activated: number;
+  message: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { activated: 0, message: 'Niet ingelogd.' };
+  }
+
+  const admin = createAdminClient();
+  const { data: subs } = await admin
+    .from('subscriptions')
+    .select('id, mollie_customer_id, status')
+    .eq('user_id', user.id)
+    .eq('status', 'incomplete');
+
+  if (!subs || subs.length === 0) {
+    return { activated: 0, message: 'Geen wachtende subscriptions.' };
+  }
+
+  const mollie = mollieClient();
+  let activated = 0;
+
+  for (const sub of subs as Array<{
+    id: string;
+    mollie_customer_id: string | null;
+    status: string;
+  }>) {
+    if (!sub.mollie_customer_id) continue;
+
+    // Zoek paid payment voor deze customer
+    let hasPaid = false;
+    try {
+      const payments = await mollie.customerPayments.iterate({
+        customerId: sub.mollie_customer_id,
+      });
+      for await (const p of payments) {
+        if (p.status === 'paid') {
+          hasPaid = true;
+          break;
+        }
+      }
+    } catch (e) {
+      console.error('[syncMyPendingSubscription] Mollie error:', e);
+      continue;
+    }
+
+    if (!hasPaid) continue;
+
+    const periodEnd = new Date();
+    periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+    const { error } = await admin
+      .from('subscriptions')
+      .update({
+        status: 'active',
+        current_period_end: periodEnd.toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sub.id);
+
+    if (!error) activated++;
+  }
+
+  if (activated > 0) {
+    revalidatePath('/account');
+  }
+
+  return {
+    activated,
+    message:
+      activated > 0
+        ? `${activated} subscription geactiveerd.`
+        : 'Mollie bevestigt nog geen betaling. Wacht even en refresh, of mail support.',
+  };
+}
