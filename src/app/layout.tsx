@@ -4,6 +4,7 @@ import './globals.css';
 import AuthBar from './components/AuthBar';
 import AppFooter from './components/AppFooter';
 import CookieBanner from './components/CookieBanner';
+import ThemeScript from './components/ThemeScript';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,8 +31,12 @@ export default function RootLayout({
     <html
       lang="nl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-full flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
         <AuthBar />
         {children}
         <AppFooter />

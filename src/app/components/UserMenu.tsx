@@ -61,27 +61,27 @@ export default function UserMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account-menu openen"
-        className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-orange-200"
+        className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-500/30"
       >
         <div className="w-7 h-7 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">
           {initial}
         </div>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-500 transition ${open ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 text-slate-500 dark:text-slate-400 transition ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-50 origin-top-right"
+          className="absolute right-0 mt-2 w-60 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50 origin-top-right"
         >
           {/* Email-header */}
-          <div className="px-3 py-2.5 border-b border-slate-100">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+          <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
               Ingelogd als
             </div>
-            <div className="text-sm font-medium text-slate-900 truncate" title={email}>
+            <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate" title={email}>
               {email}
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function UserMenu({
               setOpen(false);
               window.location.href = '/?view=audit';
             }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-left"
           >
             <Zap className="w-4 h-4 text-slate-400" />
             Nieuwe audit
@@ -110,7 +110,7 @@ export default function UserMenu({
               setOpen(false);
               window.location.href = '/?view=history';
             }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-left"
           >
             <ListChecks className="w-4 h-4 text-slate-400" />
             Mijn audits
@@ -119,7 +119,7 @@ export default function UserMenu({
             href="/account"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+            className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
           >
             <Settings className="w-4 h-4 text-slate-400" />
             Account &amp; pakket
@@ -127,12 +127,12 @@ export default function UserMenu({
 
           {showAdminLink && (
             <>
-              <div className="border-t border-slate-100 my-1" />
+              <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
               <Link
                 href="/admin"
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm text-orange-700 hover:bg-orange-50 transition font-medium"
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition font-medium"
               >
                 <Shield className="w-4 h-4 text-orange-500" />
                 Admin
@@ -140,13 +140,13 @@ export default function UserMenu({
             </>
           )}
 
-          <div className="border-t border-slate-100 my-1" />
+          <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
 
           <form action={signOut}>
             <button
               type="submit"
               role="menuitem"
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition text-left"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-left"
             >
               <LogOut className="w-4 h-4 text-slate-400" />
               Uitloggen

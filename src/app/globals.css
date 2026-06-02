@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
-/* Conversielek draait (voorlopig) altijd in light mode — de oude
-   Vite-app deed dat ook. Dark-mode toggle is later een feature, niet
-   automatisch via OS-preference. */
+/* Dark mode = class-based. Triggers wanneer `<html class="dark">` actief is.
+   ThemeProvider zet de class op basis van localStorage / OS-preference.
+   Inline script in layout.tsx voorkomt FOUC (flash of unstyled content). */
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
 }
 
 @theme inline {
