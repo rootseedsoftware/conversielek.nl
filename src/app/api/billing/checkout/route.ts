@@ -58,10 +58,14 @@ export async function POST(req: NextRequest) {
   } catch {
     return Response.json({ error: 'Ongeldige JSON.' }, { status: 400 });
   }
+  // Sprint 6: jaarlijkse plans toegevoegd (webshop_yearly / agency_yearly).
+  // Whitelist hier alle betaalde slugs zodat we wisselende interval-typen
+  // (monthly/yearly) via één endpoint kunnen handelen.
+  const allowedSlugs = ['webshop', 'agency', 'webshop_yearly', 'agency_yearly'] as const;
   const planSlug = body.planSlug;
-  if (planSlug !== 'webshop' && planSlug !== 'agency') {
+  if (!planSlug || !allowedSlugs.includes(planSlug as (typeof allowedSlugs)[number])) {
     return Response.json(
-      { error: 'Plan moet "webshop" of "agency" zijn.' },
+      { error: `Plan moet één van: ${allowedSlugs.join(', ')}.` },
       { status: 400 }
     );
   }

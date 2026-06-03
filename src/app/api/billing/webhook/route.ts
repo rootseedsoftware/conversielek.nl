@@ -162,15 +162,19 @@ async function handleFirstPaymentPaid(
 
   const { data: plan } = await admin
     .from('plans')
-    .select('id, name, slug, price_cents, currency')
+    .select('id, name, slug, price_cents, currency, billing_interval')
     .eq('slug', planSlug)
     .single();
   if (!plan) throw new Error(`Plan slug "${planSlug}" niet gevonden`);
 
-  // Maak Mollie subscription (recurring)
+  // Maak Mollie subscription (recurring) — interval uit plan.billing_interval
+  // Sprint 6: 'yearly' = '12 months' Mollie-string, 'monthly' = '1 month'.
   const proto = req.headers.get('x-forwarded-proto') ?? 'https';
   const host = req.headers.get('host') ?? 'conversielek.nl';
   const webhookUrl = `${proto}://${host}/api/billing/webhook`;
+
+  const mollieInterval = plan.billing_interval === 'yearly' ? '12 months' : '1 month';
+  const intervalLabel = plan.billing_interval === 'yearly' ? 'jaarlijks' : 'maandelijks';
 
   const sub = await mollie.customerSubscriptions.create({
     customerId,
@@ -178,8 +182,8 @@ async function handleFirstPaymentPaid(
       currency: plan.currency,
       value: (plan.price_cents / 100).toFixed(2),
     },
-    interval: '1 month',
-    description: `${plan.name} — maandelijks`,
+    interval: mollieInterval,
+    description: `${plan.name} — ${intervalLabel}`,
     webhookUrl,
     metadata: {
       supabase_user_id: userId,
