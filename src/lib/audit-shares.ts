@@ -15,6 +15,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { company } from '@/lib/data/company';
 import type { AuditResult } from '@/lib/claude';
 import type { FlowType } from '@/lib/data/flow-types';
 
@@ -92,11 +93,12 @@ export async function createAuditShare(input: {
     return { error: 'Kon share-link niet aanmaken.' };
   }
 
-  // Build absolute URL. Voorkeur: VERCEL_URL env var; fallback: company.url
-  // (= conversielek.nl in prod). In dev: localhost via VERCEL_URL ontbreken.
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://conversielek.nl');
+  // Build absolute URL. Bewust GEEN VERCEL_URL meer — die geeft de
+  // preview-deploy-URL (bv. project-zw80y-...vercel.app) die de oude
+  // project-naam bevat, niet ons production-domain. Gebruik altijd
+  // company.url (= conversielek.nl). NEXT_PUBLIC_SITE_URL als override
+  // voor lokale dev (bv. http://localhost:3000).
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? company.url;
 
   return {
     token: data.token,
