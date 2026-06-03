@@ -21,6 +21,7 @@ import { productCategories } from '@/lib/data/categories';
 import { severityLabels } from '@/lib/data/severity';
 import { getConfidenceConfig, calculateIceScore, getIcePriorityLabel } from '@/lib/data/confidence';
 import { nlCheckCatalog, statusConfig, calculateNlScore } from '@/lib/data/nl-checks';
+import { avgCheckCatalog, calculateAvgScore, countCriticalGaps } from '@/lib/data/avg-checks';
 import { company } from '@/lib/data/company';
 
 const severityStyles: Record<AuditResult['issues'][number]['severity'], string> = {
@@ -392,6 +393,63 @@ ${checksHtml}</div>`;
 <div class="nl-check"><div class="nl-check-label">AVG / Cookie-conformiteit</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.gdpr_cookies)}</div></div></div>`;
   }
   return '';
+})()}
+
+<!-- ============ SPRINT 5 — AVG-CHECKS ============ -->
+${(() => {
+  if (!audit.avg_deep_checks || audit.avg_deep_checks.length === 0) return '';
+  const deep = audit.avg_deep_checks;
+  const score = calculateAvgScore(deep);
+  const criticalGaps = countCriticalGaps(deep);
+  const scoreColor = score >= 80 ? '#059669' : score >= 60 ? '#ca8a04' : '#dc2626';
+  const catalog = new Map(avgCheckCatalog.map((m) => [m.id, m]));
+
+  const checksHtml = deep
+    .map((check) => {
+      const meta = catalog.get(check.id);
+      if (!meta) return '';
+      const status = statusConfig[check.status];
+      return `<div class="nl-check" style="border-left-color: ${status.hex.border}; background: ${status.hex.bg}33;">
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom: 4px;">
+    <div class="nl-check-label" style="color:${status.hex.text}">${escapeHtml(meta.label)}</div>
+    <span class="meta-pill" style="background:${status.hex.bg}; color:${status.hex.text}; border-color:${status.hex.border};">${escapeHtml(status.label)}</span>
+  </div>
+  <div class="nl-check-text">${escapeHtml(check.finding)}</div>
+  ${
+    check.recommendation && check.status !== 'ok'
+      ? `<div style="font-size:11px; color:#475569; margin-top: 6px; padding: 6px 10px; background: #ffffff; border-radius: 6px;"><strong>Aanbeveling:</strong> ${escapeHtml(check.recommendation)}</div>`
+      : ''
+  }
+  <div style="font-size:10px; color:#94a3b8; font-style:italic; margin-top:6px;">Bron: ${escapeHtml(meta.reference)}</div>
+</div>`;
+    })
+    .join('');
+
+  return `<div class="section section-major"><h2 class="section-title">AVG-conformiteit</h2>
+<p class="section-subtitle">Op basis van AP-richtlijnen en AVG-artikelen. Geen vervanging van juridisch advies.</p>
+${
+  criticalGaps > 0
+    ? `<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
+  <strong style="color:#991b1b; font-size:13px;">⚠ ${criticalGaps} kritieke ontbrekende AVG-${criticalGaps === 1 ? 'check' : 'checks'}</strong>
+  <div style="font-size:11px; color:#7f1d1d; margin-top:4px; line-height:1.5;">Dit zijn wettelijke vereisten. AVG-boetes kunnen oplopen tot 4% jaaromzet. Aanbeveling: laten verifiëren door jurist.</div>
+</div>`
+    : ''
+}
+<div style="background: linear-gradient(135deg, ${scoreColor}, ${scoreColor}dd); color: white; padding: 20px 24px; border-radius: 16px; margin-bottom: 18px; display:flex; align-items:center; gap: 20px;">
+  <div>
+    <div style="font-size:42px; font-weight:800; line-height:1;">${score}%</div>
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; opacity:0.85; margin-top:4px;">AVG-conformiteit</div>
+  </div>
+  <div style="font-size:12px; opacity:0.9; line-height: 1.5;">
+    ${deep.length} checks o.b.v. AP-richtlijnen — cookie-banner, tracking-pixels, privacy-policy, datasubject-rechten.
+  </div>
+</div>
+${checksHtml}
+<div style="margin-top:14px; padding:12px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; font-size:11px; color:#475569; line-height:1.5;">
+  <strong style="color:#334155;">⚖ Juridische disclaimer:</strong> Deze checks signaleren risico's op basis van AP-richtlijnen.
+  Geen vervanging van juridisch advies. Voor wettelijk zekere conformiteit: raadpleeg een privacy-jurist of FG.
+</div>
+</div>`;
 })()}
 
 ${

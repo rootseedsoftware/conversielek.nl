@@ -71,6 +71,7 @@ import IcePriorityPill from '@/app/components/IcePriorityPill';
 import IssueExportButton from '@/app/components/IssueExportButton';
 import BulkExportButton from '@/app/components/BulkExportButton';
 import NlDeepChecksSection from '@/app/components/NlDeepChecksSection';
+import AvgDeepChecksSection from '@/app/components/AvgDeepChecksSection';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
@@ -1995,6 +1996,9 @@ export default function App() {
 
         {/* Sprint 4 — Diepere NL-checks (nieuwe rich sectie met score + status per check) */}
         <NlDeepChecksSection checks={audit.nl_deep_checks} />
+
+        {/* Sprint 5 — AVG-conformiteit met AP-richtlijn-references + disclaimer */}
+        <AvgDeepChecksSection checks={audit.avg_deep_checks} />
 
         {audit.nl_specific_checks && !audit.nl_deep_checks && (
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">

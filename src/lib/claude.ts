@@ -87,6 +87,8 @@ export type AuditResult = {
   };
   /** Sprint 4 — Rich NL-checks. Optional voor backward-compat met oude audits. */
   nl_deep_checks?: NlDeepCheck[];
+  /** Sprint 5 — Diepe AVG/GDPR-checks per AP-richtlijn. Optional voor backward-compat. */
+  avg_deep_checks?: NlDeepCheck[];
 };
 
 export type Screenshot = {

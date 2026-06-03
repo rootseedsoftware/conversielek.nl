@@ -210,6 +210,14 @@ Geef je antwoord ALLEEN als geldige JSON (geen markdown, geen tekst eromheen):
       "finding": "Wat je concreet ziet op de screenshot — bv. 'Thuiswinkel Waarborg-logo zichtbaar in footer, klikbaar naar verificatie-pagina'",
       "recommendation": "Concrete actie als status != ok. Anders weglaten."
     }
+  ],
+  "avg_deep_checks": [
+    {
+      "id": "cookie_banner_equal_prominence",
+      "status": "warning",
+      "finding": "Wat je observeert m.b.t. AVG-conformiteit — bv. 'Cookie-banner toont prominente Accepteren-knop, maar Weigeren is grijze tekst-link'",
+      "recommendation": "Maak weigeren-knop visueel identiek aan accepteren (zelfde grootte, kleurintensiteit)."
+    }
   ]
 }
 
@@ -244,6 +252,45 @@ Voor elke check:
 EERLIJKHEIDS-REGEL: als je iets NIET kunt zien op de screenshot (bv. retour-pagina
 zit niet in beeld), markeer dan als 'warning' met finding "Niet zichtbaar in
 huidige screenshots — handmatig controleren". Liever onzeker zijn dan gokken.
+
+AVG DEEP-CHECKS (verplicht): vul ook avg_deep_checks array — zelfde format als
+nl_deep_checks met status (ok/warning/missing/not_applicable). 9 IDs:
+
+  - cookie_banner_equal_prominence — "Weigeren" knop visueel even prominent
+                                     als "Accepteren". Verstopt onder
+                                     "Instellingen" = warning of missing.
+  - cookie_banner_no_prechecks     — Geen pre-checked vinkjes voor niet-
+                                     functionele cookies. Pre-checked = missing.
+  - cookie_banner_granularity      — Aparte keuze per categorie (functioneel/
+                                     analytisch/marketing). Eén "OK" knop voor
+                                     alles = warning.
+  - privacy_policy_accessible      — Link zichtbaar in footer + cookie-banner.
+                                     Alleen via FAQ/menu diep = warning.
+  - tracking_pixels_disclosed      — Als je tracking-pixels detecteert (Meta,
+                                     GA, TikTok, etc), zijn ze benoemd in
+                                     privacy-policy? Niet zichtbaar = warning.
+  - data_retention_specified       — Concrete bewaartermijnen ("7 jaar na
+                                     laatste login") ipv vaag "zo lang nodig".
+                                     Vaag = warning.
+  - data_subject_rights            — Inzage/correctie/verwijdering/portabiliteit
+                                     uitgelegd + contactadres. Generieke verwijzing
+                                     naar AP = warning.
+  - sub_processors_listed          — Externe verwerkers (Supabase/AWS/Mailchimp
+                                     etc.) gelijst met EU-status. B2C kan
+                                     'not_applicable' krijgen indien minimaal.
+  - breach_procedure               — 72-uur AP-melding + betrokkenen-info bij
+                                     hoog risico vermeld in privacy. Niet
+                                     vermeld = warning.
+
+Voor elke AVG-check:
+  - finding: WAT je daadwerkelijk ziet/observeert (specifiek, 1-2 zinnen).
+  - status: ok / warning / missing / not_applicable.
+  - recommendation: korte concrete actie. Alleen bij status != ok.
+
+EERLIJKHEID OVER AVG: AVG is wetgeving — vermijd vage suggesties. Als je iets
+echt niet kunt zien (privacy-pagina niet in screenshots), schrijf dan:
+finding "Privacy-pagina niet in screenshots aanwezig — handmatig controleren",
+status 'warning'. NIET gokken dat het er wel/niet zal staan.
 
 Severity: critical/high/medium/low. Geef 5-10 issues. Schrijf in het Nederlands met commerciële focus.`;
 }
