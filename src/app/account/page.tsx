@@ -192,6 +192,28 @@ export default async function AccountPage({ searchParams }: Props) {
             </div>
           </Link>
 
+          {/* Sprint 10 — audit-reminders */}
+          <Link
+            href="/account/schedules"
+            className="block bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6 hover:border-orange-300 dark:hover:border-orange-500/50 transition group"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  Audit-reminders
+                </h2>
+                <p className="text-slate-900 dark:text-slate-100 font-semibold mb-1">
+                  Periodieke herinnering + regressie-alerts
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Krijg een email om opnieuw te auditen, en automatische waarschuwingen wanneer je
+                  score zakt.
+                </p>
+              </div>
+              <div className="text-orange-500 group-hover:translate-x-1 transition-transform">→</div>
+            </div>
+          </Link>
+
           {/* Change password */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
             <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">

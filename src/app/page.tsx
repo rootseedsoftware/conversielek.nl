@@ -77,6 +77,9 @@ import AvgDeepChecksSection from '@/app/components/AvgDeepChecksSection';
 import WebshopTrendCard from '@/app/components/WebshopTrendCard';
 import { groupAuditsByWebshop } from '@/lib/audit-grouping';
 import ShareAuditButton from '@/app/components/ShareAuditButton';
+import ScheduleReminderPrompt from '@/app/components/ScheduleReminderPrompt';
+import { checkAndAlertRegression } from '@/lib/audit-reminders';
+import { createClient } from '@/lib/supabase/client';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
@@ -222,6 +225,37 @@ export default function App() {
       setResolvedIssues({});
       await loadHistory();
       await incrementCounter();
+
+      // Sprint 10 — score-regressie check (fire-and-forget, fail-silent
+      // mag de save-flow niet breken). Resolveert webshop_key uit URL of
+      // genormaliseerde naam — zelfde conventie als audit-grouping.ts.
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const wkey = (() => {
+            try {
+              if (webshopUrl) {
+                const u = new URL(webshopUrl.startsWith('http') ? webshopUrl : `https://${webshopUrl}`);
+                return `host:${u.hostname.replace(/^www\./, '').toLowerCase()}`;
+              }
+            } catch {
+              /* ignore */
+            }
+            return `name:${(webshopName || webshopUrl || 'onbekende webshop').toLowerCase().trim().replace(/[^\p{L}\p{N}\s]+/gu, '').replace(/\s+/g, ' ')}`;
+          })();
+          void checkAndAlertRegression({
+            userId: user.id,
+            webshopKey: wkey,
+            newScore: auditData.overall_score,
+          });
+        }
+      } catch {
+        /* fail-silent — regressie-check is bonus, geen kritisch pad */
+      }
+
       return key;
     } catch (e) {
       console.error('Failed to save audit:', e);
@@ -2041,6 +2075,25 @@ export default function App() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Sprint 10 — reminder-prompt voor ingelogde users (alleen bij echte audit, niet demo) */}
+        {currentAuditKey && currentAuditKey !== 'demo' && (
+          <ScheduleReminderPrompt
+            webshopKey={(() => {
+              try {
+                if (webshopUrl) {
+                  const u = new URL(webshopUrl.startsWith('http') ? webshopUrl : `https://${webshopUrl}`);
+                  return `host:${u.hostname.replace(/^www\./, '').toLowerCase()}`;
+                }
+              } catch {
+                /* ignore */
+              }
+              return `name:${(webshopName || webshopUrl || 'onbekende webshop').toLowerCase().trim().replace(/[^\p{L}\p{N}\s]+/gu, '').replace(/\s+/g, ' ')}`;
+            })()}
+            webshopDisplayName={webshopName || webshopUrl || 'Webshop'}
+            webshopUrl={webshopUrl || undefined}
+          />
+        )}
+
         <div className="mb-4 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
           {flow && <flow.icon className="w-4 h-4 text-orange-600" />}
           <span className="font-medium text-slate-900 dark:text-slate-100">{webshopName || 'Webshop'}</span>
