@@ -80,12 +80,13 @@ import ShareAuditButton from '@/app/components/ShareAuditButton';
 import ScheduleReminderPrompt from '@/app/components/ScheduleReminderPrompt';
 import { checkAndAlertRegression } from '@/lib/audit-reminders';
 import { createClient } from '@/lib/supabase/client';
+import BenchmarkView from '@/app/components/BenchmarkView';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
 // ---- Local types -----------------------------------------------------------
 
-type View = 'landing' | 'audit' | 'history' | 'report' | 'compare';
+type View = 'landing' | 'audit' | 'history' | 'report' | 'compare' | 'benchmark';
 
 type Toast = { message: string; type: 'success' | 'error' };
 
@@ -155,6 +156,12 @@ export default function App() {
   const [historyMode, setHistoryMode] = useState<'grouped' | 'flat'>('grouped');
   const [compareLeft, setCompareLeft] = useState<HistoryItem | null>(null);
   const [compareRight, setCompareRight] = useState<HistoryItem | null>(null);
+  // Sprint 11 — Concurrentie-benchmark: parallel aan compare-mode maar
+  // accepteert 2-4 audits. compareSelection wordt hergebruikt voor de
+  // selectie zelf; benchmarkMode bepaalt of we 2- (compare) of 2-4-
+  // (benchmark) selectie toelaten.
+  const [benchmarkMode, setBenchmarkMode] = useState(false);
+  const [benchmarkItems, setBenchmarkItems] = useState<HistoryItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Lees ?view=audit|history van de URL op mount (gebruikt door de
@@ -1308,7 +1315,7 @@ export default function App() {
                   </button>
                 </div>
               )}
-              {history.length >= 2 && (
+              {history.length >= 2 && !benchmarkMode && (
                 <button
                   onClick={() => {
                     setCompareMode(!compareMode);
@@ -1322,6 +1329,23 @@ export default function App() {
                 >
                   <GitCompare className="w-4 h-4" />
                   {compareMode ? 'Annuleer vergelijken' : 'Vergelijken'}
+                </button>
+              )}
+              {/* Sprint 11 — concurrentie-benchmark (2-4 audits zelfde flow) */}
+              {history.length >= 2 && !compareMode && (
+                <button
+                  onClick={() => {
+                    setBenchmarkMode(!benchmarkMode);
+                    setCompareSelection([]);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
+                    benchmarkMode
+                      ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  {benchmarkMode ? 'Annuleer benchmark' : 'Benchmark'}
                 </button>
               )}
               <button
@@ -1339,6 +1363,8 @@ export default function App() {
           <p className="text-slate-600 dark:text-slate-400 mb-8">
             {compareMode
               ? 'Selecteer 2 audits van dezelfde flow (bv. 2× homepage). Mag van dezelfde webshop (voor/na) of van verschillende webshops (benchmark).'
+              : benchmarkMode
+              ? 'Selecteer 2-4 audits van dezelfde flow voor een concurrentie-benchmark. De eerst-gekozen audit telt als "jij" — daar tonen we waar je leerkansen liggen.'
               : historyMode === 'grouped'
               ? 'Score-trend per webshop. Doe maandelijks een audit en zie of je verbetert.'
               : 'Alle audits chronologisch — nieuwste eerst.'}
@@ -1398,10 +1424,11 @@ export default function App() {
                 const canSelect =
                   !firstItem || isSelected || firstItem.flowType === item.flowType;
 
+                const maxSelection = benchmarkMode ? 4 : 2;
                 const toggleSelect = () => {
                   if (isSelected) {
                     setCompareSelection((s) => s.filter((k) => k !== item.key));
-                  } else if (compareSelection.length < 2 && canSelect) {
+                  } else if (compareSelection.length < maxSelection && canSelect) {
                     setCompareSelection((s) => [...s, item.key]);
                   }
                 };
@@ -1514,6 +1541,29 @@ export default function App() {
                 </button>
               </div>
             )}
+
+            {/* Sprint 11 — Floating benchmark-CTA bij 2-4 geselecteerde audits */}
+            {benchmarkMode && compareSelection.length >= 2 && (
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                <button
+                  onClick={() => {
+                    // Hou de selectie-volgorde aan — eerste = "jij"
+                    const ordered = compareSelection
+                      .map((k) => history.find((h) => h.key === k))
+                      .filter((x): x is HistoryItem => Boolean(x));
+                    if (ordered.length < 2) return;
+                    setBenchmarkItems(ordered);
+                    setView('benchmark');
+                    setBenchmarkMode(false);
+                    setCompareSelection([]);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-full shadow-xl font-medium flex items-center gap-2 transition"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Bekijk benchmark ({compareSelection.length})
+                </button>
+              </div>
+            )}
             </>
           )}
         </div>
@@ -1524,6 +1574,21 @@ export default function App() {
   // ============================================================
   // COMPARE
   // ============================================================
+  // ============================================================
+  // BENCHMARK (Sprint 11) — concurrentie-vergelijking 2-4 audits
+  // ============================================================
+  if (view === 'benchmark' && benchmarkItems.length >= 2) {
+    return (
+      <BenchmarkView
+        items={benchmarkItems}
+        onBack={() => {
+          setView('history');
+          setBenchmarkItems([]);
+        }}
+      />
+    );
+  }
+
   if (view === 'compare' && compareLeft && compareRight) {
     const diff = compareAudits(compareLeft.audit, compareRight.audit);
     const scoreDiff =
