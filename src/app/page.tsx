@@ -72,6 +72,8 @@ import IssueExportButton from '@/app/components/IssueExportButton';
 import BulkExportButton from '@/app/components/BulkExportButton';
 import NlDeepChecksSection from '@/app/components/NlDeepChecksSection';
 import AvgDeepChecksSection from '@/app/components/AvgDeepChecksSection';
+import WebshopTrendCard from '@/app/components/WebshopTrendCard';
+import { groupAuditsByWebshop } from '@/lib/audit-grouping';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
@@ -141,6 +143,10 @@ export default function App() {
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
   const [compareMode, setCompareMode] = useState(false);
   const [compareSelection, setCompareSelection] = useState<string[]>([]);
+  // Sprint 7 — Toggle "Per webshop" (gegroepeerd met trend-cards) vs "Alle audits"
+  // (huidige flat-lijst). Default grouped; compare-mode forceert flat want
+  // vergelijken vereist platte selectie van twee specifieke audits.
+  const [historyMode, setHistoryMode] = useState<'grouped' | 'flat'>('grouped');
   const [compareLeft, setCompareLeft] = useState<HistoryItem | null>(null);
   const [compareRight, setCompareRight] = useState<HistoryItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1221,6 +1227,31 @@ export default function App() {
               <span className="font-bold text-slate-900 dark:text-slate-100">Conversielek</span>
             </button>
             <div className="flex items-center gap-2">
+              {/* Sprint 7 — View-toggle. Compare-mode forceert flat. */}
+              {history.length >= 2 && !compareMode && (
+                <div className="inline-flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  <button
+                    onClick={() => setHistoryMode('grouped')}
+                    className={`px-2.5 py-1.5 text-xs font-semibold rounded-md transition ${
+                      historyMode === 'grouped'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    Per webshop
+                  </button>
+                  <button
+                    onClick={() => setHistoryMode('flat')}
+                    className={`px-2.5 py-1.5 text-xs font-semibold rounded-md transition ${
+                      historyMode === 'flat'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    Alle audits
+                  </button>
+                </div>
+              )}
               {history.length >= 2 && (
                 <button
                   onClick={() => {
@@ -1252,7 +1283,9 @@ export default function App() {
           <p className="text-slate-600 dark:text-slate-400 mb-8">
             {compareMode
               ? 'Selecteer 2 audits van dezelfde flow (bv. 2× homepage). Mag van dezelfde webshop (voor/na) of van verschillende webshops (benchmark).'
-              : 'Je eerder uitgevoerde audits — gegroepeerd per webshop voor vergelijking.'}
+              : historyMode === 'grouped'
+              ? 'Score-trend per webshop. Doe maandelijks een audit en zie of je verbetert.'
+              : 'Alle audits chronologisch — nieuwste eerst.'}
           </p>
 
           {historyLoading ? (
@@ -1269,6 +1302,26 @@ export default function App() {
                 onClick: () => setView('audit'),
               }}
             />
+          ) : historyMode === 'grouped' && !compareMode ? (
+            /* Sprint 7 — Per-webshop view met trend-cards */
+            <div className="space-y-4">
+              {groupAuditsByWebshop(history).map((group) => (
+                <WebshopTrendCard
+                  key={group.key}
+                  group={group}
+                  onSelectAudit={(item) => {
+                    setCurrentAuditKey(item.key);
+                    setAudit(item.audit);
+                    setFlowType(item.flowType);
+                    setWebshopName(item.webshopName);
+                    setWebshopUrl(item.webshopUrl ?? '');
+                    setProductCategory(item.productCategory);
+                    void fetchResolved(item.key).then((r) => setResolvedIssues(r));
+                    setView('report');
+                  }}
+                />
+              ))}
+            </div>
           ) : (
             <>
             <div className="space-y-3">
