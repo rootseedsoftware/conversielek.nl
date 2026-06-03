@@ -74,6 +74,7 @@ import NlDeepChecksSection from '@/app/components/NlDeepChecksSection';
 import AvgDeepChecksSection from '@/app/components/AvgDeepChecksSection';
 import WebshopTrendCard from '@/app/components/WebshopTrendCard';
 import { groupAuditsByWebshop } from '@/lib/audit-grouping';
+import ShareAuditButton from '@/app/components/ShareAuditButton';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
@@ -2006,6 +2007,8 @@ export default function App() {
               <Printer className="w-4 h-4" />
               PDF
             </button>
+            {/* Sprint 8 — Share-link voor klant. Werkt alleen voor Supabase-audits. */}
+            <ShareAuditButton auditId={currentAuditKey} variant="prominent" />
             <button
               onClick={resetForm}
               className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
