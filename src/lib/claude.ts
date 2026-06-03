@@ -12,6 +12,31 @@ export type AuditSource = {
   detail: string;
 };
 
+/**
+ * Hoe zeker is de AI dat dit issue (a) écht een issue is en (b) de
+ * aanbeveling de juiste oplossing is. Bepaalt het "implementeer-met-zorg"
+ * label op de UI: high=groen (veilig direct), medium=geel (test eerst),
+ * low=rood (strategische beslissing — valideer met je team).
+ *
+ * Optional — oude audits van vóór sprint-1 hebben dit veld niet. UI
+ * faalt graceful met een neutrale fallback in dat geval.
+ */
+export type IssueConfidence = 'high' | 'medium' | 'low';
+
+/**
+ * ICE-prioritization framework (klassieker uit CRO/PM):
+ *   - impact: hoe groot wordt het effect als je 't fixt (1-10)
+ *   - ease:   hoe makkelijk is de fix (1-10, 10 = triviaal)
+ *
+ * Note: het traditionele ICE heeft óók een 'confidence' parameter, maar
+ * die overlapt met onze IssueConfidence boven — we gebruiken díe één keer
+ * ipv twee aparte confidence-velden. Score = (impact + ease + confidence-num) / 3.
+ */
+export type IssueIce = {
+  impact: number; // 1-10
+  ease: number; // 1-10
+};
+
 export type AuditIssue = {
   title: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
@@ -22,6 +47,10 @@ export type AuditIssue = {
   microcopy_suggestion: string | null;
   principle: string;
   sources: AuditSource[];
+  /** Sprint 1: AI-zelf-eerlijkheid over de issue-detectie. Optional voor backward-compat. */
+  confidence?: IssueConfidence;
+  /** Sprint 1: ICE-componenten voor prioriteit-sortering. Optional voor backward-compat. */
+  ice?: IssueIce;
 };
 
 export type AuditResult = {

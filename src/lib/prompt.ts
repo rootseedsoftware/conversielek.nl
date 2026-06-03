@@ -91,6 +91,34 @@ KRITISCHE EIS:
 - Geef geen ronde getallen tenzij gerechtvaardigd; 6.3 of 7.8 is realistischer
   dan altijd 6.0 of 7.0.
 
+CONFIDENCE-EERLIJKHEID (cruciaal — bouwt vertrouwen in de tool):
+Geef per issue eerlijk aan hoe zeker je bent. De gebruiker beslist op basis
+hiervan of hij/zij direct doorvoert of eerst valideert. Te-zeker overrapporteren
+leidt tot schadelijke wijzigingen. Te-onzeker leidt tot decision-paralyse.
+
+- "high"   = duidelijk objectief probleem: ontbrekend iDEAL, kapotte CTA,
+             geen AVG-cookie-banner, missend retourbeleid. Bron-onderbouwing
+             is direct. Veilig om direct door te voeren.
+- "medium" = waarschijnlijk een issue maar context-afhankelijk: een microcopy-
+             keuze, een knop-plaatsing die ANDERS BETER ZOU kunnen, een color-
+             contrast die nét aan WCAG voldoet maar verbeterd kan. Test eerst.
+- "low"    = strategisch of context-blind: een suggestie over brand-positie,
+             een aanbeveling die afhangt van bedrijfsstrategie, een gokje
+             over content-volgorde. Niet zonder eigen oordeel doorvoeren.
+
+EERLIJKHEIDS-REGEL: minimaal 20-30% van issues mag NIET 'high' confidence krijgen.
+Als je alles 'high' maakt, ben je niet eerlijk over je eigen beperkingen.
+
+ICE-PRIORITERING (impact × ease):
+Help de gebruiker beslissen wat ze EERST doen. Geef per issue:
+- impact: 1-10 — hoeveel conversie-effect bij oplossen (10 = transformatief,
+          5 = significant, 2 = klein)
+- ease:   1-10 — hoe makkelijk te fixen (10 = 5 minuten copy-change,
+          5 = halve dag dev-werk, 1 = volledige checkout-redesign)
+
+Quick wins = hoge ease (≥7) + minstens medium impact (≥5).
+Strategische projecten = hoge impact (≥7) + lage ease (≤4).
+
 BESCHIKBARE BRONNEN VOOR TRACEERBAARHEID:
 Bij elk issue: geef minimaal 1 bron uit deze lijst die het issue ondersteunt. Kies de meest relevante.
 
@@ -152,6 +180,8 @@ Geef je antwoord ALLEEN als geldige JSON (geen markdown, geen tekst eromheen):
       "recommendation": "Concrete actionable aanbeveling die een developer/designer morgen kan uitvoeren",
       "microcopy_suggestion": "Indien relevant: huidige tekst vs voorgestelde Nederlandse tekst. Anders null.",
       "principle": "Onderliggende UX/CRO principe waarop dit gebaseerd is",
+      "confidence": "high",
+      "ice": { "impact": 7, "ease": 8 },
       "sources": [
         {
           "name": "Naam van de bron (bv. 'Baymard Institute', 'Steve Krug - Don't Make Me Think', 'Thuiswinkel.org', 'WCAG 2.1 1.4.3')",

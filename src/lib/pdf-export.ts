@@ -19,6 +19,7 @@ import type { FlowType } from '@/lib/data/flow-types';
 import { flowTypes } from '@/lib/data/flow-types';
 import { productCategories } from '@/lib/data/categories';
 import { severityLabels } from '@/lib/data/severity';
+import { getConfidenceConfig, calculateIceScore, getIcePriorityLabel } from '@/lib/data/confidence';
 import { company } from '@/lib/data/company';
 
 const severityStyles: Record<AuditResult['issues'][number]['severity'], string> = {
@@ -191,6 +192,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .issue-title { font-size: 16px; font-weight: 700; margin: 0; flex: 1; line-height: 1.35; }
 .severity-badge { padding: 4px 10px; border-radius: 999px; color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
 .category-tag { display: inline-block; color: #64748b; font-size: 11px; font-weight: 600; padding: 3px 8px; background: #f1f5f9; border-radius: 6px; margin-bottom: 10px; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; align-items: center; }
+.meta-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; border: 1px solid; }
+.ice-score-mini { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; color: #64748b; font-weight: 600; }
 .issue-desc { font-size: 13px; color: #334155; margin: 8px 0 12px 0; line-height: 1.55; }
 .issue-box { background: #f8fafc; padding: 12px 14px; border-radius: 10px; margin-top: 8px; border-left: 3px solid #cbd5e1; }
 .issue-box.impact { border-left-color: #f97316; background: #fff7ed; }
@@ -367,12 +371,33 @@ ${
 ${audit.issues
   .map((issue) => {
     const color = severityStyles[issue.severity];
+    const confCfg = getConfidenceConfig(issue.confidence);
+    const iceScore = calculateIceScore(issue.ice);
+    const iceLabel = getIcePriorityLabel(iceScore);
+    const iceColors: Record<string, { bg: string; text: string; border: string }> = {
+      emerald: { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0' },
+      slate: { bg: '#f8fafc', text: '#475569', border: '#e2e8f0' },
+      amber: { bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
+    };
+    const iceClr = iceColors[iceLabel.color] ?? iceColors.slate;
     return `<div class="issue" style="border-left: 4px solid ${color};">
   <div class="issue-head">
     <h3 class="issue-title">${escapeHtml(issue.title)}</h3>
     <span class="severity-badge" style="background: ${color};">${escapeHtml(severityLabels[issue.severity])}</span>
   </div>
-  <span class="category-tag">${escapeHtml(issue.category)}</span>
+  <div class="tag-row">
+    <span class="category-tag" style="margin-bottom: 0;">${escapeHtml(issue.category)}</span>
+    ${
+      issue.confidence
+        ? `<span class="meta-pill" style="background:${confCfg.hex.bg}; color:${confCfg.hex.text}; border-color:${confCfg.hex.border};">${escapeHtml(confCfg.short)}</span>`
+        : ''
+    }
+    ${
+      iceLabel.label
+        ? `<span class="meta-pill" style="background:${iceClr.bg}; color:${iceClr.text}; border-color:${iceClr.border};">${escapeHtml(iceLabel.label)}</span><span class="ice-score-mini" title="Impact × Ease">ICE ${iceScore}/100</span>`
+        : ''
+    }
+  </div>
   <div class="issue-desc">${escapeHtml(issue.description)}</div>
   ${
     issue.conversion_impact

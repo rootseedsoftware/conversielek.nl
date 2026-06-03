@@ -66,6 +66,8 @@ import ScoreRing from '@/app/components/ScoreRing';
 import SeveritySummary from '@/app/components/SeveritySummary';
 import HeroMockup from '@/app/components/HeroMockup';
 import PricingComparison from '@/app/components/PricingComparison';
+import IssueConfidenceBadge from '@/app/components/IssueConfidenceBadge';
+import IcePriorityPill from '@/app/components/IcePriorityPill';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
 // ---- Local types -----------------------------------------------------------
@@ -457,7 +459,16 @@ export default function App() {
       .map((issue, originalIndex) => ({ ...issue, originalIndex }))
       .filter((issue) => severityFilter === 'all' || issue.severity === severityFilter)
       .filter((issue) => categoryFilter === 'all' || issue.category === categoryFilter)
-      .sort((a, b) => severityConfig[a.severity].order - severityConfig[b.severity].order);
+      .sort((a, b) => {
+        // Primair: severity (kritiek voor hoog voor medium voor laag).
+        const sevDiff = severityConfig[a.severity].order - severityConfig[b.severity].order;
+        if (sevDiff !== 0) return sevDiff;
+        // Sprint 1 — secundair: ICE-score (hoog → laag). Binnen dezelfde
+        // severity staat dus de quickste win bovenaan.
+        const aIce = a.ice ? a.ice.impact * a.ice.ease : 0;
+        const bIce = b.ice ? b.ice.impact * b.ice.ease : 0;
+        return bIce - aIce;
+      });
   };
 
   const getCategories = () =>
@@ -2171,6 +2182,9 @@ export default function App() {
                                 {config.label}
                               </span>
                               <span className="text-slate-600 dark:text-slate-400 font-medium">{issue.category}</span>
+                              {/* Sprint 1: vertrouwen + prioriteit-tags */}
+                              <IssueConfidenceBadge confidence={issue.confidence} />
+                              <IcePriorityPill ice={issue.ice} />
                             </div>
                           </div>
                         </div>
