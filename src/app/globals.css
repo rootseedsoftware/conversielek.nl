@@ -45,3 +45,14 @@ body {
 .animate-slide-in-up {
   animation: slide-in-up 0.3s ease-out;
 }
+
+/* Modal fade-in (Sprint 3 — export-modal). Aparte animatie ipv slide
+   omdat een modal die "omhoog komt" rommelig oogt midden in een scroll. */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}

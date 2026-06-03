@@ -68,6 +68,9 @@ import HeroMockup from '@/app/components/HeroMockup';
 import PricingComparison from '@/app/components/PricingComparison';
 import IssueConfidenceBadge from '@/app/components/IssueConfidenceBadge';
 import IcePriorityPill from '@/app/components/IcePriorityPill';
+import IssueExportButton from '@/app/components/IssueExportButton';
+import BulkExportButton from '@/app/components/BulkExportButton';
+import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
 // ---- Local types -----------------------------------------------------------
@@ -2093,6 +2096,18 @@ export default function App() {
             </div>
           </div>
 
+          {/* Sprint 3 — bulk-export bovenaan: zichtbaar als er ≥2 quick wins zijn */}
+          {audit && (
+            <BulkExportButton
+              issues={audit.issues}
+              ctx={{
+                webshopName: webshopName || 'Jouw webshop',
+                webshopUrl: webshopUrl || undefined,
+                flowLabel: flowTypes.find((f) => f.value === flowType)?.label ?? '',
+              }}
+            />
+          )}
+
           <div className="flex flex-wrap items-center gap-2 mb-5 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
               <Filter className="w-3.5 h-3.5" />
@@ -2274,8 +2289,18 @@ export default function App() {
                             </div>
                           </div>
                         )}
-                        <div className="text-xs text-slate-500 dark:text-slate-400 italic mt-3">
-                          Principe: <span className="font-medium">{issue.principle}</span>
+                        <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 italic min-w-0">
+                            Principe: <span className="font-medium">{issue.principle}</span>
+                          </div>
+                          <IssueExportButton
+                            issue={issue}
+                            ctx={{
+                              webshopName: webshopName || 'Jouw webshop',
+                              webshopUrl: webshopUrl || undefined,
+                              flowLabel: flowTypes.find((f) => f.value === flowType)?.label ?? '',
+                            } satisfies ExportContext}
+                          />
                         </div>
                       </div>
                     </div>
