@@ -53,6 +53,21 @@ export type AuditIssue = {
   ice?: IssueIce;
 };
 
+/**
+ * Sprint 4 — Diepere NL-checks, één rich object per check uit de catalog.
+ * Status + bevinding + aanbeveling per item. Backward-compat: optional veld,
+ * oude audits zonder dit veld renderen alleen de flat nl_specific_checks.
+ */
+export type NlDeepCheck = {
+  /** Stabiele ID uit `nl-checks.ts` catalog (bv. 'thuiswinkel_waarborg') */
+  id: string;
+  status: 'ok' | 'warning' | 'missing' | 'not_applicable';
+  /** Wat de AI ziet op de screenshot ('ik zie keurmerk x in de footer') */
+  finding: string;
+  /** Concrete actie indien status ≠ 'ok' */
+  recommendation?: string;
+};
+
 export type AuditResult = {
   overall_score: number;
   conversion_impact_estimate: string;
@@ -70,6 +85,8 @@ export type AuditResult = {
     trust_badges: string;
     gdpr_cookies: string;
   };
+  /** Sprint 4 — Rich NL-checks. Optional voor backward-compat met oude audits. */
+  nl_deep_checks?: NlDeepCheck[];
 };
 
 export type Screenshot = {

@@ -20,6 +20,7 @@ import { flowTypes } from '@/lib/data/flow-types';
 import { productCategories } from '@/lib/data/categories';
 import { severityLabels } from '@/lib/data/severity';
 import { getConfidenceConfig, calculateIceScore, getIcePriorityLabel } from '@/lib/data/confidence';
+import { nlCheckCatalog, statusConfig, calculateNlScore } from '@/lib/data/nl-checks';
 import { company } from '@/lib/data/company';
 
 const severityStyles: Record<AuditResult['issues'][number]['severity'], string> = {
@@ -337,17 +338,61 @@ ${
 }
 
 <!-- ============ CONTENT PAGE 2 — NL CHECKS ============ -->
-${
-  audit.nl_specific_checks
-    ? `<div class="section section-major"><h2 class="section-title">Nederlandse webshop-checks</h2>
+${(() => {
+  // Sprint 4 — Voorkeur: rich nl_deep_checks. Fallback: oude flat nl_specific_checks
+  // voor audits van vóór sprint 4 (backward-compat).
+  if (audit.nl_deep_checks && audit.nl_deep_checks.length > 0) {
+    const deep = audit.nl_deep_checks;
+    const score = calculateNlScore(deep);
+    const scoreColor = score >= 80 ? '#059669' : score >= 60 ? '#ca8a04' : '#dc2626';
+    const catalog = new Map(nlCheckCatalog.map((m) => [m.id, m]));
+
+    const checksHtml = deep
+      .map((check) => {
+        const meta = catalog.get(check.id);
+        if (!meta) return '';
+        const status = statusConfig[check.status];
+        const borderColor = status.hex.border;
+        return `<div class="nl-check" style="border-left-color: ${borderColor}; background: ${status.hex.bg}33;">
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom: 4px;">
+    <div class="nl-check-label" style="color:${status.hex.text}">${escapeHtml(meta.label)}</div>
+    <span class="meta-pill" style="background:${status.hex.bg}; color:${status.hex.text}; border-color:${status.hex.border};">${escapeHtml(status.label)}</span>
+  </div>
+  <div class="nl-check-text">${escapeHtml(check.finding)}</div>
+  ${
+    check.recommendation && check.status !== 'ok'
+      ? `<div style="font-size:11px; color:#475569; margin-top: 6px; padding: 6px 10px; background: #ffffff; border-radius: 6px;"><strong>Aanbeveling:</strong> ${escapeHtml(check.recommendation)}</div>`
+      : ''
+  }
+</div>`;
+      })
+      .join('');
+
+    return `<div class="section section-major"><h2 class="section-title">Nederlandse webshop-checks</h2>
+<p class="section-subtitle">10 specifieke conventies voor NL-shops — keurmerken, betaalmethoden, AVG.</p>
+<div style="background: linear-gradient(135deg, ${scoreColor}, ${scoreColor}dd); color: white; padding: 20px 24px; border-radius: 16px; margin-bottom: 18px; display:flex; align-items:center; gap: 20px;">
+  <div>
+    <div style="font-size:42px; font-weight:800; line-height:1;">${score}%</div>
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; opacity:0.85; margin-top:4px;">NL-conformiteit</div>
+  </div>
+  <div style="font-size:12px; opacity:0.9; line-height: 1.5;">
+    Gebaseerd op ${deep.length} specifieke NL-checks (keurmerken, betaalmethoden, AVG-conformiteit, retour-beleid).
+  </div>
+</div>
+${checksHtml}</div>`;
+  }
+  // Fallback: oude flat checks
+  if (audit.nl_specific_checks) {
+    return `<div class="section section-major"><h2 class="section-title">Nederlandse webshop-checks</h2>
 <p class="section-subtitle">Specifieke heuristieken voor de NL-markt — iDEAL, achteraf betalen, AVG.</p>
 <div class="nl-check"><div class="nl-check-label">iDEAL zichtbaarheid</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.ideal_visible)}</div></div>
 <div class="nl-check"><div class="nl-check-label">Achteraf betalen (Klarna / Riverty)</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.afterpay_klarna)}</div></div>
 <div class="nl-check"><div class="nl-check-label">Gratis verzending — communicatie</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.free_shipping_communication)}</div></div>
 <div class="nl-check"><div class="nl-check-label">Trust-badges / keurmerken</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.trust_badges)}</div></div>
-<div class="nl-check"><div class="nl-check-label">AVG / Cookie-conformiteit</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.gdpr_cookies)}</div></div></div>`
-    : ''
-}
+<div class="nl-check"><div class="nl-check-label">AVG / Cookie-conformiteit</div><div class="nl-check-text">${escapeHtml(audit.nl_specific_checks.gdpr_cookies)}</div></div></div>`;
+  }
+  return '';
+})()}
 
 ${
   audit.dutch_benchmarks && audit.dutch_benchmarks.length > 0

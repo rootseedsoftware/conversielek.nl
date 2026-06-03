@@ -70,6 +70,7 @@ import IssueConfidenceBadge from '@/app/components/IssueConfidenceBadge';
 import IcePriorityPill from '@/app/components/IcePriorityPill';
 import IssueExportButton from '@/app/components/IssueExportButton';
 import BulkExportButton from '@/app/components/BulkExportButton';
+import NlDeepChecksSection from '@/app/components/NlDeepChecksSection';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
@@ -1992,7 +1993,10 @@ export default function App() {
           </div>
         )}
 
-        {audit.nl_specific_checks && (
+        {/* Sprint 4 — Diepere NL-checks (nieuwe rich sectie met score + status per check) */}
+        <NlDeepChecksSection checks={audit.nl_deep_checks} />
+
+        {audit.nl_specific_checks && !audit.nl_deep_checks && (
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 mb-6">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl flex items-center justify-center">

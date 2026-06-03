@@ -202,8 +202,48 @@ Geef je antwoord ALLEEN als geldige JSON (geen markdown, geen tekst eromheen):
     "free_shipping_communication": "Wordt gratis verzending duidelijk gecommuniceerd (en vanaf welk bedrag)?",
     "trust_badges": "Thuiswinkel Waarborg / Webwinkel Keurmerk / reviews zichtbaar?",
     "gdpr_cookies": "Voldoet de cookie-banner aan AVG (equal prominence weigeren)?"
-  }
+  },
+  "nl_deep_checks": [
+    {
+      "id": "thuiswinkel_waarborg",
+      "status": "ok",
+      "finding": "Wat je concreet ziet op de screenshot — bv. 'Thuiswinkel Waarborg-logo zichtbaar in footer, klikbaar naar verificatie-pagina'",
+      "recommendation": "Concrete actie als status != ok. Anders weglaten."
+    }
+  ]
 }
+
+NL DEEP-CHECKS (verplicht): geef voor ELK van deze IDs een entry in nl_deep_checks
+(behalve als de check echt niet relevant is voor deze flow — gebruik dan status 'not_applicable'):
+
+  - thuiswinkel_waarborg     — Nederlandse keurmerk (Thuiswinkel Waarborg / Webwinkel Keurmerk).
+                                Status 'ok' alleen als logo prominent én klikbaar naar
+                                verificatie-pagina. 'warning' bij alleen statisch plaatje.
+  - shipping_transparency    — Worden verzendkosten VROEG getoond? Op productpagina al?
+                                Of pas in checkout (= warning/missing).
+  - return_policy_prominence — Retour-info op productpagina + footer. 14 dagen-vermelding.
+                                Retourkosten transparant.
+  - btw_clarity              — Prijzen met expliciet "incl. BTW" of "excl. BTW" (B2C vs B2B).
+                                Inconsistentie = warning. Geen vermelding = missing.
+  - delivery_carrier         — Vervoerder (PostNL/DHL/UPS) + verwachte levertijd
+                                ("morgen in huis" als gerechtvaardigd).
+  - afterpay_methods         — Klarna/Riverty/Billink met welke specifiek + voorwaarden zichtbaar.
+  - ideal_prominence         — iDEAL bovenaan in betaaloptie-lijst. Niet onder PayPal/CC.
+  - reviews_visible          — Echte sterren + aantal reviews + klikbaar naar review-pagina.
+                                Pure "Wij zijn de beste" = warning.
+  - gdpr_cookies             — Weigeren even prominent als accepteren. Geen pre-checks.
+                                Granulariteit per categorie (functioneel/analytisch/marketing).
+  - contact_visibility       — KvK, adres, telefoon/chat-optie zichtbaar (Dienstenwet-eis).
+
+Voor elke check:
+  - finding: WAT je daadwerkelijk ziet (1-2 zinnen). Wees specifiek over plek
+             ("rechtsonder in footer", "tussen productafbeelding en titel").
+  - status: ok / warning / missing / not_applicable.
+  - recommendation: KORTE concrete actie. Alleen invullen bij status != ok.
+
+EERLIJKHEIDS-REGEL: als je iets NIET kunt zien op de screenshot (bv. retour-pagina
+zit niet in beeld), markeer dan als 'warning' met finding "Niet zichtbaar in
+huidige screenshots — handmatig controleren". Liever onzeker zijn dan gokken.
 
 Severity: critical/high/medium/low. Geef 5-10 issues. Schrijf in het Nederlands met commerciële focus.`;
 }
