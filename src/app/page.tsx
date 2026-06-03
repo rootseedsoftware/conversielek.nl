@@ -57,7 +57,9 @@ import { severityConfig } from '@/lib/data/severity';
 import { faqs } from '@/lib/data/faqs';
 import { sampleAudit } from '@/lib/data/sample-audit';
 import { buildAuditPrompt } from '@/lib/prompt';
-import { exportAuditAsPdf } from '@/lib/pdf-export';
+import { exportAuditAsPdf, type PdfBranding } from '@/lib/pdf-export';
+import { getMyBranding, getLogoPublicUrl } from '@/lib/branding';
+import { applyBrandingDefaults } from '@/lib/branding-types';
 import { compressScreenshot } from '@/lib/image-compress';
 import { getQuotaInfo, type QuotaInfo } from '@/lib/billing-actions';
 import { sendAuditByEmail } from '@/lib/email-actions';
@@ -420,9 +422,28 @@ export default function App() {
 
   // ---- Helpers -----------------------------------------------------------
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     if (!audit) return;
-    exportAuditAsPdf({ audit, flowType, webshopName, productCategory });
+    // M6 white-label: laad branding voor ingelogde user. Server Action.
+    // Fallback bij no-branding: PDF gebruikt default Conversielek-stijl.
+    let branding: PdfBranding | undefined;
+    try {
+      const myBranding = await getMyBranding();
+      if (myBranding) {
+        const filled = applyBrandingDefaults(myBranding);
+        const logoUrl = filled.logoPath ? await getLogoPublicUrl(filled.logoPath) : null;
+        branding = {
+          primaryHex: filled.primaryColor ?? 'f97316',
+          secondaryHex: filled.secondaryColor ?? 'dc2626',
+          brandName: filled.brandName ?? undefined,
+          logoUrl: logoUrl ?? undefined,
+          footerText: filled.footerText ?? undefined,
+        };
+      }
+    } catch {
+      /* Geen branding beschikbaar — gebruik default */
+    }
+    exportAuditAsPdf({ audit, flowType, webshopName, productCategory, branding });
     showToast('PDF wordt voorbereid');
   };
 

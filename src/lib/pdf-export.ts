@@ -85,11 +85,30 @@ function countBySeverity(issues: AuditResult['issues']): Record<string, number> 
   return counts;
 }
 
+/**
+ * Branding-override voor white-label PDF. Optional — zonder branding
+ * gebruikt de PDF de default Conversielek-oranje + KvK-blok.
+ */
+export type PdfBranding = {
+  /** 6-char hex zonder hash, bv. "f97316" */
+  primaryHex: string;
+  /** 6-char hex zonder hash voor gradient-eindkleur */
+  secondaryHex: string;
+  /** Brand-naam in plaats van "Conversielek" */
+  brandName?: string;
+  /** Public URL naar logo (Supabase Storage of extern) */
+  logoUrl?: string;
+  /** Custom footer-tekst in plaats van TROFSOF KvK-blok */
+  footerText?: string;
+};
+
 export type PdfExportInput = {
   audit: AuditResult;
   flowType: FlowType['value'];
   webshopName: string;
   productCategory: string;
+  /** Sprint M6 — optionele white-label branding-override */
+  branding?: PdfBranding;
 };
 
 export function exportAuditAsPdf({
@@ -97,7 +116,14 @@ export function exportAuditAsPdf({
   flowType,
   webshopName,
   productCategory,
+  branding,
 }: PdfExportInput): void {
+  // Sprint M6 — Branding-overrides. Default-fallback naar Conversielek-stijl.
+  const brandPrimaryHex = branding?.primaryHex ? `#${branding.primaryHex}` : '#f97316';
+  const brandSecondaryHex = branding?.secondaryHex ? `#${branding.secondaryHex}` : '#dc2626';
+  const brandName = branding?.brandName?.trim() || company.tradeName;
+  const brandLogoUrl = branding?.logoUrl ?? null;
+  const customFooterText = branding?.footerText?.trim() || null;
   const scoreColor =
     audit.overall_score >= 8
       ? '#059669'
@@ -134,9 +160,10 @@ html, body { margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #0f172a; line-height: 1.6; background: white; font-size: 13px; }
 
 /* ============ COVER PAGE ============ */
-.cover { width: 210mm; height: 297mm; padding: 28mm 22mm; display: flex; flex-direction: column; position: relative; page-break-after: always; background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%); }
+.cover { width: 210mm; height: 297mm; padding: 28mm 22mm; display: flex; flex-direction: column; position: relative; page-break-after: always; background: linear-gradient(180deg, #ffffff 0%, ${brandPrimaryHex}15 100%); }
 .cover-brand { display: flex; align-items: center; gap: 10px; margin-bottom: auto; }
-.cover-logo { width: 44px; height: 44px; background: linear-gradient(135deg, #f97316 0%, #dc2626 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 22px; box-shadow: 0 4px 14px rgba(249,115,22,0.25); }
+.cover-logo { width: 44px; height: 44px; background: linear-gradient(135deg, ${brandPrimaryHex} 0%, ${brandSecondaryHex} 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 22px; box-shadow: 0 4px 14px ${brandPrimaryHex}40; }
+.cover-logo-img { width: 44px; height: 44px; object-fit: contain; border-radius: 10px; background: white; padding: 2px; box-shadow: 0 4px 14px ${brandPrimaryHex}30; }
 .cover-brand-text { font-weight: 700; font-size: 18px; color: #0f172a; letter-spacing: -0.01em; }
 .cover-brand-tag { font-size: 10px; color: #64748b; }
 .cover-main { margin: 60px 0; }
@@ -155,12 +182,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .cover-meta { margin-top: auto; padding-top: 30px; border-top: 1px solid #fed7aa; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; font-size: 12px; color: #64748b; }
 .cover-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; margin-bottom: 4px; }
 .cover-meta-value { font-size: 13px; color: #0f172a; font-weight: 600; }
-.cover-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 22mm; background: #fff7ed; border-top: 1px solid #fed7aa; font-size: 9px; color: #c2410c; text-align: center; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; }
+.cover-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 22mm; background: ${brandPrimaryHex}15; border-top: 1px solid ${brandPrimaryHex}40; font-size: 9px; color: ${brandPrimaryHex}; text-align: center; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; }
 
 /* ============ CONTENT PAGES ============ */
-.page-header { display: flex; align-items: center; justify-content: space-between; padding: 0 0 16px 0; margin-bottom: 28px; border-bottom: 2px solid #f97316; }
+.page-header { display: flex; align-items: center; justify-content: space-between; padding: 0 0 16px 0; margin-bottom: 28px; border-bottom: 2px solid ${brandPrimaryHex}; }
 .page-header-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #0f172a; }
-.page-header-logo { width: 24px; height: 24px; background: linear-gradient(135deg, #f97316, #dc2626); border-radius: 6px; }
+.page-header-logo { width: 24px; height: 24px; background: linear-gradient(135deg, ${brandPrimaryHex}, ${brandSecondaryHex}); border-radius: 6px; }
 .page-header-meta { font-size: 11px; color: #64748b; }
 
 .severity-overview { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; padding: 18px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
@@ -175,18 +202,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 
 .section { margin-bottom: 36px; page-break-inside: avoid; }
 .section-major { page-break-before: always; padding-top: 8px; }
-.section-title { font-size: 22px; font-weight: 800; margin: 0 0 18px 0; padding-left: 14px; border-left: 4px solid #f97316; line-height: 1.2; letter-spacing: -0.015em; }
+.section-title { font-size: 22px; font-weight: 800; margin: 0 0 18px 0; padding-left: 14px; border-left: 4px solid ${brandPrimaryHex}; line-height: 1.2; letter-spacing: -0.015em; }
 .section-subtitle { font-size: 13px; color: #64748b; margin: -10px 0 18px 14px; }
 
 .impact-box { background: linear-gradient(135deg, #fef3c7 0%, #fee2e2 100%); padding: 22px 24px; border-radius: 16px; border: 1px solid #fde68a; margin-bottom: 28px; display: flex; gap: 16px; align-items: flex-start; }
-.impact-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #f97316, #dc2626); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0; }
+.impact-icon { width: 40px; height: 40px; background: linear-gradient(135deg, ${brandPrimaryHex}, ${brandSecondaryHex}); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0; }
 .impact-label { font-size: 10px; font-weight: 700; color: #92400e; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
 .impact-text { font-size: 15px; font-weight: 600; color: #78350f; line-height: 1.5; }
 
 .strength-list, .quickwins-list { list-style: none; padding: 0; margin: 0; }
 .strength-item { padding: 12px 16px; background: #ecfdf5; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #059669; font-size: 13px; color: #064e3b; }
 .quickwin-item { padding: 14px 18px; background: white; border: 1px solid #fed7aa; border-radius: 12px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
-.quickwin-number { flex-shrink: 0; width: 28px; height: 28px; background: linear-gradient(135deg, #f97316, #dc2626); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+.quickwin-number { flex-shrink: 0; width: 28px; height: 28px; background: linear-gradient(135deg, ${brandPrimaryHex}, ${brandSecondaryHex}); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
 .quickwin-text { font-size: 14px; color: #1e293b; line-height: 1.5; }
 
 .issue { border-radius: 14px; padding: 20px 22px; margin-bottom: 14px; page-break-inside: avoid; border: 1px solid #e2e8f0; background: white; }
@@ -199,7 +226,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .ice-score-mini { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; color: #64748b; font-weight: 600; }
 .issue-desc { font-size: 13px; color: #334155; margin: 8px 0 12px 0; line-height: 1.55; }
 .issue-box { background: #f8fafc; padding: 12px 14px; border-radius: 10px; margin-top: 8px; border-left: 3px solid #cbd5e1; }
-.issue-box.impact { border-left-color: #f97316; background: #fff7ed; }
+.issue-box.impact { border-left-color: ${brandPrimaryHex}; background: ${brandPrimaryHex}10; }
 .box-label { font-size: 10px; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; }
 .box-content { font-size: 12px; color: #1e293b; line-height: 1.55; }
 .microcopy-box { background: #eff6ff; border-left: 3px solid #2563eb; padding: 12px 14px; border-radius: 10px; margin-top: 8px; }
@@ -223,7 +250,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .benchmark-shop { font-weight: 700; color: #c2410c; font-size: 13px; margin-bottom: 4px; }
 .benchmark-desc { font-size: 13px; color: #475569; line-height: 1.5; }
 
-.nl-check { background: #f8fafc; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #f97316; }
+.nl-check { background: #f8fafc; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid ${brandPrimaryHex}; }
 .nl-check-label { font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 4px; }
 .nl-check-text { font-size: 12px; color: #475569; line-height: 1.55; }
 
@@ -240,10 +267,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 <!-- ============ COVER PAGE ============ -->
 <section class="cover">
   <div class="cover-brand">
-    <div class="cover-logo">C</div>
+    ${
+      brandLogoUrl
+        ? `<img src="${escapeHtml(brandLogoUrl)}" alt="" class="cover-logo-img" />`
+        : `<div class="cover-logo">${escapeHtml(brandName.charAt(0).toUpperCase())}</div>`
+    }
     <div>
-      <div class="cover-brand-text">${escapeHtml(company.tradeName)}</div>
-      <div class="cover-brand-tag">Nederlandse webshop UX-audit</div>
+      <div class="cover-brand-text">${escapeHtml(brandName)}</div>
+      <div class="cover-brand-tag">${branding?.brandName ? 'Conversie-audit' : 'Nederlandse webshop UX-audit'}</div>
     </div>
   </div>
 
@@ -287,7 +318,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
     </div>
   </div>
 
-  <div class="cover-footer">Gegenereerd door ${escapeHtml(company.tradeName)}.nl · ${escapeHtml(company.legalName)} · KvK ${escapeHtml(company.kvk)}</div>
+  <div class="cover-footer">${
+  branding
+    ? `${escapeHtml(brandName)} · Powered by ${escapeHtml(company.tradeName)}`
+    : `Gegenereerd door ${escapeHtml(company.tradeName)}.nl · ${escapeHtml(company.legalName)} · KvK ${escapeHtml(company.kvk)}`
+}</div>
 </section>
 
 <!-- ============ CONTENT PAGE 1 — OVERZICHT ============ -->
@@ -542,9 +577,20 @@ ${
 }
 
 <div class="footer">
-  <div class="footer-grid">
+  ${
+    customFooterText
+      ? `<div class="footer-grid" style="justify-content: center;">
+    <div class="footer-brand" style="text-align: center; max-width: 100%;">
+      <div class="footer-brand-name" style="color: ${brandPrimaryHex};">${escapeHtml(brandName)}</div>
+      <div class="footer-brand-tagline" style="margin-top: 4px; white-space: pre-line;">${escapeHtml(customFooterText)}</div>
+    </div>
+  </div>
+  <div class="footer-meta">
+    Gegenereerd op ${escapeHtml(new Date().toLocaleString('nl-NL'))} · Powered by ${escapeHtml(company.tradeName)}
+  </div>`
+      : `<div class="footer-grid">
     <div class="footer-brand">
-      <div class="footer-brand-name">${escapeHtml(company.tradeName)}.nl</div>
+      <div class="footer-brand-name" style="color: ${brandPrimaryHex};">${escapeHtml(brandName)}${branding ? '' : `.nl`}</div>
       <div class="footer-brand-tagline">Nederlandse webshop UX-audit — gemaakt voor de NL-markt</div>
     </div>
     <div class="footer-company">
@@ -556,7 +602,8 @@ ${
   </div>
   <div class="footer-meta">
     Gegenereerd op ${escapeHtml(new Date().toLocaleString('nl-NL'))} · ${escapeHtml(company.url)}
-  </div>
+  </div>`
+  }
 </div>
 
 <script>window.onload = () => setTimeout(() => window.print(), 500);</script>
