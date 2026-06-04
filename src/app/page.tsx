@@ -81,6 +81,12 @@ import ScheduleReminderPrompt from '@/app/components/ScheduleReminderPrompt';
 import { checkAndAlertRegression } from '@/lib/audit-reminders';
 import { createClient } from '@/lib/supabase/client';
 import BenchmarkView from '@/app/components/BenchmarkView';
+import IssueCollaboration from '@/app/components/IssueCollaboration';
+import {
+  listAuditCollaboration,
+  type CollaborationSnapshot,
+  type IssueStatus,
+} from '@/lib/issue-collaboration';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
 
@@ -162,6 +168,11 @@ export default function App() {
   // (benchmark) selectie toelaten.
   const [benchmarkMode, setBenchmarkMode] = useState(false);
   const [benchmarkItems, setBenchmarkItems] = useState<HistoryItem[]>([]);
+  // Sprint 9 — team-collab data per audit. Laden bij elke view-switch
+  // naar report-view (via useEffect). Per issue-index zit hier status +
+  // comments.
+  const [collab, setCollab] = useState<CollaborationSnapshot>({ states: [], comments: [] });
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Lees ?view=audit|history van de URL op mount (gebruikt door de
@@ -178,6 +189,28 @@ export default function App() {
       }
     });
   }, []);
+
+  // Sprint 9 — laad collab-data bij elke wisseling van audit-id
+  useEffect(() => {
+    if (!currentAuditKey || currentAuditKey === 'demo' || view !== 'report') {
+      return;
+    }
+    queueMicrotask(async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setCurrentUserId(user?.id ?? null);
+        if (user) {
+          const snap = await listAuditCollaboration(currentAuditKey);
+          setCollab(snap);
+        }
+      } catch {
+        /* fail-silent — collab is optioneel */
+      }
+    });
+  }, [currentAuditKey, view]);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') =>
     setToast({ message, type });
@@ -2573,6 +2606,19 @@ export default function App() {
                             } satisfies ExportContext}
                           />
                         </div>
+
+                        {/* Sprint 9 — team-collab per issue (alleen voor ingelogde, opgeslagen audits) */}
+                        {currentAuditKey && currentAuditKey !== 'demo' && currentUserId && (
+                          <IssueCollaboration
+                            auditId={currentAuditKey}
+                            issueIndex={issue.originalIndex}
+                            initialStatus={
+                              collab.states.find((s) => s.issueIndex === issue.originalIndex)?.status as IssueStatus | undefined
+                            }
+                            initialComments={collab.comments.filter((c) => c.issueIndex === issue.originalIndex)}
+                            currentUserId={currentUserId}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
