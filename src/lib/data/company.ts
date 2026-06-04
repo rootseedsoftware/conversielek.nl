@@ -18,9 +18,9 @@ export const company = {
 
   // Vestigingsadres
   address: {
-    street: 'Goeman Borgesiuslaan 77',
-    postalCode: '3515 ET',
-    city: 'Utrecht',
+    street: 'Bargelaan 200',
+    postalCode: '2333 CW',
+    city: 'Leiden',
     country: 'Nederland',
   },
 
@@ -38,5 +38,5 @@ export const company = {
 
   // Datum van laatste juridische update — handmatig bumpen bij wijzigingen
   // aan privacy of AV zodat gebruikers zien dat er iets veranderd is.
-  legalUpdatedAt: '2026-06-01',
+  legalUpdatedAt: '2026-06-04',
 } as const;
