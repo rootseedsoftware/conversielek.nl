@@ -214,6 +214,28 @@ export default async function AccountPage({ searchParams }: Props) {
             </div>
           </Link>
 
+          {/* M7 — API-keys */}
+          <Link
+            href="/account/api-keys"
+            className="block bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6 hover:border-orange-300 dark:hover:border-orange-500/50 transition group"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                  API-keys
+                </h2>
+                <p className="text-slate-900 dark:text-slate-100 font-semibold mb-1">
+                  Programmatic access — trigger audits vanuit eigen tooling
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Bearer-token auth, JSON API. Voor CI/CD, dashboards en custom integraties. Zie de{' '}
+                  <span className="text-orange-600 dark:text-orange-400 underline">API-docs</span>.
+                </p>
+              </div>
+              <div className="text-orange-500 group-hover:translate-x-1 transition-transform">→</div>
+            </div>
+          </Link>
+
           {/* Change password */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
             <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">

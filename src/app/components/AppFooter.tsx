@@ -48,6 +48,10 @@ export default function AppFooter() {
             <Link href="/contact" className={linkClass}>
               Contact
             </Link>
+            <span className={sepClass}>·</span>
+            <Link href="/developers" className={linkClass}>
+              API
+            </Link>
           </div>
         </div>
         <div className="text-slate-400 dark:text-slate-500">
