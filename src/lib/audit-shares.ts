@@ -16,8 +16,27 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { company } from '@/lib/data/company';
+import { getUserBranding, getLogoPublicUrl } from '@/lib/branding';
+import { applyBrandingDefaults } from '@/lib/branding-types';
+import type { BrandingSettings } from '@/lib/branding-types';
 import type { AuditResult } from '@/lib/claude';
 import type { FlowType } from '@/lib/data/flow-types';
+
+/**
+ * Volledig "resolved" branding voor share-page render: kleuren genormaliseerd
+ * naar #-prefix hex, logo-URL al opgelost, default-fallback toegepast. Null
+ * = de creator heeft geen branding ingesteld → fallback naar Conversielek.
+ */
+export type ResolvedBranding = {
+  primaryHex: string;
+  secondaryHex: string;
+  brandName: string;
+  logoUrl: string | null;
+  footerText: string | null;
+  /** True als er échte agency-branding actief is (ipv default). Toggle de
+   *  "Powered by Conversielek"-credit in de share-page. */
+  isWhiteLabel: boolean;
+};
 
 export type AuditShare = {
   token: string;
@@ -42,7 +61,53 @@ export type SharedAuditPayload = {
     flowType: FlowType['value'];
     result: AuditResult;
   };
+  /** Sprint M6-vervolg: resolved branding van de audit-eigenaar. */
+  branding: ResolvedBranding;
 };
+
+// ─────────────────────────────────────────────────────────────────────────
+// Branding-resolution
+// ─────────────────────────────────────────────────────────────────────────
+
+const DEFAULT_BRANDING: ResolvedBranding = {
+  primaryHex: '#f97316',
+  secondaryHex: '#dc2626',
+  brandName: company.tradeName,
+  logoUrl: null,
+  footerText: null,
+  isWhiteLabel: false,
+};
+
+/**
+ * Resolveert de raw BrandingSettings van een audit-eigenaar naar een
+ * volledig render-klaar object. Lege/null branding → default Conversielek.
+ *
+ * isWhiteLabel-detectie: een gebruiker telt als "white-label actief" als
+ * hij minstens één van logo, brandName of footerText heeft ingevuld. Pure
+ * kleur-aanpassingen (zonder andere customizations) blijven Conversielek-
+ * branded (kleur is geen volledige white-label).
+ */
+async function resolveBranding(
+  raw: BrandingSettings | null
+): Promise<ResolvedBranding> {
+  if (!raw) return DEFAULT_BRANDING;
+
+  const filled = applyBrandingDefaults(raw);
+  const logoUrl = filled.logoPath ? await getLogoPublicUrl(filled.logoPath) : null;
+  const hasLogo = !!logoUrl;
+  const hasBrandName = !!filled.brandName?.trim();
+  const hasFooterText = !!filled.footerText?.trim();
+  const isWhiteLabel = hasLogo || hasBrandName || hasFooterText;
+
+  return {
+    primaryHex: `#${filled.primaryColor ?? 'f97316'}`,
+    secondaryHex: `#${filled.secondaryColor ?? 'dc2626'}`,
+    brandName: filled.brandName?.trim() || company.tradeName,
+    logoUrl,
+    footerText: filled.footerText?.trim() || null,
+    isWhiteLabel,
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // AUTHENTICATED — eigen shares beheren
@@ -180,11 +245,17 @@ export async function resolveSharedAudit(token: string): Promise<SharedAuditPayl
   // 3. Audit ophalen via admin-client (bypass RLS — public share-toegang)
   const { data: auditRow, error: auditErr } = await admin
     .from('audits')
-    .select('id, created_at, webshop_name, webshop_url, product_category, flow_type, audit')
+    .select(
+      'id, created_at, user_id, webshop_name, webshop_url, product_category, flow_type, audit'
+    )
     .eq('id', shareRow.audit_id)
     .maybeSingle();
 
   if (auditErr || !auditRow) return null;
+
+  // 3b. Branding van audit-eigenaar (sprint M6-vervolg: white-label share-page)
+  const rawBranding = await getUserBranding(auditRow.user_id as string);
+  const branding = await resolveBranding(rawBranding);
 
   // 4. Access tracken — fire-and-forget, niet blokken op een falende update
   void admin
@@ -216,5 +287,6 @@ export async function resolveSharedAudit(token: string): Promise<SharedAuditPayl
       flowType: auditRow.flow_type as FlowType['value'],
       result: auditRow.audit as AuditResult,
     },
+    branding,
   };
 }

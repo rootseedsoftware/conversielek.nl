@@ -68,7 +68,7 @@ export default async function SharedAuditPage({ params }: Props) {
 
   if (!data) notFound();
 
-  const { audit, share } = data;
+  const { audit, share, branding } = data;
   const flow = flowTypes.find((f) => f.value === audit.flowType);
   const category = productCategories.find((p) => p.value === audit.productCategory);
   const reportDate = new Date(audit.createdAt).toLocaleDateString('nl-NL', {
@@ -79,16 +79,34 @@ export default async function SharedAuditPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      {/* Header */}
-      <header className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
+      {/* Header — gradient + logo komen uit branding van audit-eigenaar */}
+      <header
+        className="text-white"
+        style={{
+          background: `linear-gradient(135deg, ${branding.primaryHex}, ${branding.secondaryHex})`,
+        }}
+      >
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-9 h-9 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-white" />
-            </div>
+            {branding.logoUrl ? (
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1 shadow-sm">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={branding.logoUrl}
+                  alt={`${branding.brandName} logo`}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-9 h-9 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5 text-white" />
+              </div>
+            )}
             <div>
-              <div className="font-bold text-white">{company.tradeName}</div>
-              <div className="text-[10px] text-white/80">Gedeeld audit-rapport</div>
+              <div className="font-bold text-white">{branding.brandName}</div>
+              <div className="text-[10px] text-white/80">
+                {branding.isWhiteLabel ? 'Conversie-audit' : 'Gedeeld audit-rapport'}
+              </div>
             </div>
           </div>
 
@@ -287,7 +305,12 @@ export default async function SharedAuditPage({ params }: Props) {
                   key={i}
                   className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-3 rounded-lg"
                 >
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs font-bold flex items-center justify-center">
+                  <span
+                    className="flex-shrink-0 w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center"
+                    style={{
+                      background: `linear-gradient(135deg, ${branding.primaryHex}, ${branding.secondaryHex})`,
+                    }}
+                  >
                     {i + 1}
                   </span>
                   <span>{q}</span>
@@ -297,28 +320,56 @@ export default async function SharedAuditPage({ params }: Props) {
           </div>
         )}
 
-        {/* Footer credit */}
-        <div className="text-center mt-12 mb-6 text-sm text-slate-500 dark:text-slate-400">
-          <p className="mb-2">
-            Dit rapport is gedeeld via{' '}
-            <Link
-              href="/"
-              className="text-orange-600 dark:text-orange-400 font-semibold hover:underline"
-            >
-              {company.tradeName}
-            </Link>{' '}
-            — Nederlandse UX-audit voor webshops.
-          </p>
-          <p className="text-xs">
-            Wil je zelf zo&apos;n rapport voor je shop?{' '}
-            <Link
-              href="/"
-              className="text-orange-600 dark:text-orange-400 hover:underline"
-            >
-              Start gratis op {company.domain}
-            </Link>
-          </p>
-        </div>
+        {/* Footer — white-label krijgt eigen tekst + "Powered by" credit,
+             default-stijl behoudt Conversielek-funnel-CTA */}
+        {branding.isWhiteLabel ? (
+          <div className="mt-12 mb-6">
+            {branding.footerText && (
+              <div
+                className="p-5 rounded-2xl text-center text-sm leading-relaxed mb-4"
+                style={{
+                  background: `${branding.primaryHex}10`,
+                  color: branding.primaryHex,
+                  borderLeft: `4px solid ${branding.primaryHex}`,
+                }}
+              >
+                <div className="font-bold text-base mb-1">{branding.brandName}</div>
+                <div className="whitespace-pre-line opacity-90">{branding.footerText}</div>
+              </div>
+            )}
+            <div className="text-center text-[11px] text-slate-400 dark:text-slate-500">
+              Powered by{' '}
+              <Link
+                href="/"
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 underline"
+              >
+                {company.tradeName}
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center mt-12 mb-6 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mb-2">
+              Dit rapport is gedeeld via{' '}
+              <Link
+                href="/"
+                className="text-orange-600 dark:text-orange-400 font-semibold hover:underline"
+              >
+                {company.tradeName}
+              </Link>{' '}
+              — Nederlandse UX-audit voor webshops.
+            </p>
+            <p className="text-xs">
+              Wil je zelf zo&apos;n rapport voor je shop?{' '}
+              <Link
+                href="/"
+                className="text-orange-600 dark:text-orange-400 hover:underline"
+              >
+                Start gratis op {company.domain}
+              </Link>
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );
