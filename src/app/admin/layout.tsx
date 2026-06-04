@@ -14,6 +14,7 @@ import {
   FileSearch,
   CreditCard,
   Receipt,
+  AlertOctagon,
   ArrowLeft,
 } from 'lucide-react';
 
@@ -57,6 +58,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 icon={<Receipt className="w-3.5 h-3.5" />}
               >
                 Events
+              </AdminNavLink>
+              <AdminNavLink
+                href="/admin/errors"
+                icon={<AlertOctagon className="w-3.5 h-3.5" />}
+              >
+                Errors
               </AdminNavLink>
             </div>
           </div>

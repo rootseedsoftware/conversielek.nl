@@ -4,12 +4,14 @@
 // het renderen optreedt. Per Next.js App Router moet dit een client-
 // component zijn met een reset-knop.
 //
-// Logging: console.error voor nu — als Sentry of vergelijkbaar straks
-// binnenkomt (M8 monitoring), hook hier in.
+// M8: errors gaan naar /api/log-error → Supabase error_logs tabel.
+// Fingerprint-grouping voorkomt log-spam (zelfde error meerdere keer =
+// occurrences++ ipv N nieuwe rijen).
 
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingCart, RefreshCw, ArrowLeft } from 'lucide-react';
+import { logError } from '@/lib/error-logger';
 
 export default function GlobalError({
   error,
@@ -19,7 +21,15 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('App-level error:', error);
+    queueMicrotask(() => {
+      console.error('App-level error:', error);
+      void logError({
+        message: error.message || 'Unknown error',
+        stack: error.stack,
+        level: 'error',
+        context: { digest: error.digest, name: error.name },
+      });
+    });
   }, [error]);
 
   return (

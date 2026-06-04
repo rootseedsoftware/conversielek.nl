@@ -80,6 +80,22 @@ export type AdminSubscriptionRow = {
   createdAt: string;
 };
 
+export type AdminErrorLogRow = {
+  id: string;
+  fingerprint: string;
+  level: 'error' | 'warning' | 'info';
+  source: 'client' | 'server' | 'edge' | 'cron';
+  message: string;
+  stack: string | null;
+  url: string | null;
+  userAgent: string | null;
+  userId: string | null;
+  occurrences: number;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  dismissed: boolean;
+};
+
 export type AdminPaymentEventRow = {
   id: string;
   provider: string;
@@ -427,5 +443,64 @@ export async function listPaymentEvents(opts?: {
     processedAt: r.processed_at,
     error: r.error,
     createdAt: r.created_at,
+  }));
+}
+
+// ---- Error logs (M8 monitoring) -------------------------------------------
+
+/**
+ * Recente error-logs voor /admin/errors. Filter "showDismissed" laat
+ * gearchiveerde rijen optioneel zien (default: alleen actief).
+ */
+export async function listErrorLogs(opts?: {
+  limit?: number;
+  showDismissed?: boolean;
+}): Promise<AdminErrorLogRow[]> {
+  const admin = createAdminClient();
+  const limit = opts?.limit ?? 100;
+
+  let query = admin
+    .from('error_logs')
+    .select(
+      'id, fingerprint, level, source, message, stack, url, user_agent, user_id, occurrences, first_seen_at, last_seen_at, dismissed'
+    )
+    .order('last_seen_at', { ascending: false })
+    .limit(limit);
+
+  if (!opts?.showDismissed) {
+    query = query.eq('dismissed', false);
+  }
+
+  const res = await query;
+  type Row = {
+    id: string;
+    fingerprint: string;
+    level: 'error' | 'warning' | 'info';
+    source: 'client' | 'server' | 'edge' | 'cron';
+    message: string;
+    stack: string | null;
+    url: string | null;
+    user_agent: string | null;
+    user_id: string | null;
+    occurrences: number;
+    first_seen_at: string;
+    last_seen_at: string;
+    dismissed: boolean;
+  };
+
+  return ((res.data ?? []) as Row[]).map((r) => ({
+    id: r.id,
+    fingerprint: r.fingerprint,
+    level: r.level,
+    source: r.source,
+    message: r.message,
+    stack: r.stack,
+    url: r.url,
+    userAgent: r.user_agent,
+    userId: r.user_id,
+    occurrences: r.occurrences,
+    firstSeenAt: r.first_seen_at,
+    lastSeenAt: r.last_seen_at,
+    dismissed: r.dismissed,
   }));
 }

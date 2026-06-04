@@ -7,12 +7,12 @@
 // alle payments op voor de mollie_customer_id van een subscription. Als
 // er minstens één 'paid' is, activeert de subscription voor 1 maand.
 //
-// Doel: vangnet voor het geval Mollie's webhook niet aankomt (test-mode
-// onbetrouwbaarheid, Vercel-deploy-timing, etc). In productie zou de
-// webhook altijd moeten werken — maar deze actie is een veilige fallback
-// die admin handmatig kan triggeren.
+// dismissErrorLog (M8): markeert een error_log als afgehandeld zodat
+// /admin/errors lijst schoonblijft. Re-occurrence van zelfde fingerprint
+// opent 'm automatisch weer (zie /api/log-error route).
 
 import { revalidatePath } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { mollieClient } from '@/lib/mollie/client';
@@ -132,4 +132,39 @@ export async function syncSubscriptionFromMollie(
     message: `Subscription geactiveerd! ${paidPayments} paid payment(s) gevonden, periode loopt tot ${periodEnd.toLocaleDateString('nl-NL')}.`,
     details: { paymentsFound: totalPayments, paidPayments, newStatus: 'active' },
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// M8 — Error-log dismissal
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Markeert een error_logs-rij als afgehandeld. Bij nieuwe occurrence van
+ * dezelfde fingerprint heropent /api/log-error-route 'm automatisch.
+ */
+export async function dismissErrorLog(
+  errorId: string
+): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: 'Niet ingelogd.' };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from('error_logs')
+    .update({
+      dismissed: true,
+      dismissed_at: new Date().toISOString(),
+      dismissed_by: user.id,
+    })
+    .eq('id', errorId);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  revalidatePath('/admin/errors');
+  return { ok: true };
 }
