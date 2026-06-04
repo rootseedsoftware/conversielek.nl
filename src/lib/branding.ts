@@ -11,10 +11,21 @@
 
 'use server';
 
+// LET OP: Next.js 'use server' files mogen ALLEEN async function exports
+// hebben. Type-/const-exports worden door Turbopack runtime gestript en
+// veroorzaken een build error. Importeer ResolvedBranding rechtstreeks
+// uit '@/lib/branding-types' bij consumers.
+
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { normalizeHex } from '@/lib/branding-types';
-import type { BrandingSettings } from '@/lib/branding-types';
+import {
+  normalizeHex,
+  applyBrandingDefaults,
+  DEFAULT_RESOLVED_BRANDING,
+  type BrandingSettings,
+  type ResolvedBranding,
+} from '@/lib/branding-types';
+import { company } from '@/lib/data/company';
 
 // ---- Row-mapping ---------------------------------------------------------
 
@@ -181,4 +192,50 @@ export async function deleteMyLogo(): Promise<{ ok: boolean; error?: string }> {
     return { ok: false, error: 'Kon logo niet verwijderen.' };
   }
   return { ok: true };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Resolved branding helpers (gedeeld door share-page, PDF, email)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Zet raw BrandingSettings om naar ResolvedBranding. Logo-URL ophalen,
+ * defaults invullen, isWhiteLabel detecteren.
+ *
+ * isWhiteLabel-regel: minstens één van logo / brandName / footerText
+ * is ingevuld. Pure kleur-overrides tellen NIET — die zijn te zwak
+ * signaal dat een user echt z'n brand wil pushen.
+ */
+export async function resolveBranding(
+  raw: BrandingSettings | null
+): Promise<ResolvedBranding> {
+  if (!raw) return DEFAULT_RESOLVED_BRANDING;
+
+  const filled = applyBrandingDefaults(raw);
+  const logoUrl = filled.logoPath ? await getLogoPublicUrl(filled.logoPath) : null;
+  const hasLogo = !!logoUrl;
+  const hasBrandName = !!filled.brandName?.trim();
+  const hasFooterText = !!filled.footerText?.trim();
+  const isWhiteLabel = hasLogo || hasBrandName || hasFooterText;
+
+  return {
+    primaryHex: `#${filled.primaryColor ?? 'f97316'}`,
+    secondaryHex: `#${filled.secondaryColor ?? 'dc2626'}`,
+    brandName: filled.brandName?.trim() || company.tradeName,
+    logoUrl,
+    footerText: filled.footerText?.trim() || null,
+    isWhiteLabel,
+  };
+}
+
+/**
+ * One-shot helper: gegeven een user_id, returnt resolved branding.
+ * Gebruikt admin-client (= geen RLS-restrictie) voor contexten waar
+ * de caller niet noodzakelijkerwijs de user zelf is (cron, share-page).
+ */
+export async function getResolvedBrandingForUser(
+  userId: string
+): Promise<ResolvedBranding> {
+  const raw = await getUserBranding(userId);
+  return resolveBranding(raw);
 }

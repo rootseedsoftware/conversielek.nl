@@ -15,6 +15,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { resendClient } from '@/lib/resend';
+import { getResolvedBrandingForUser } from '@/lib/branding';
+import { DEFAULT_RESOLVED_BRANDING } from '@/lib/branding-types';
 import { company } from '@/lib/data/company';
 
 export type AuditReminder = {
@@ -154,7 +156,7 @@ export async function deleteReminder(id: string): Promise<{ ok: boolean; error?:
 // CRON-HANDLER — gebruik vanuit /api/cron/send-reminders
 // ─────────────────────────────────────────────────────────────────────────
 
-export type DueReminder = AuditReminder & { userEmail: string };
+export type DueReminder = AuditReminder & { userEmail: string; userId: string };
 
 /**
  * Alle reminders met next_remind_at <= now() AND active. Gebruikt admin-
@@ -173,9 +175,11 @@ export async function listDueReminders(): Promise<DueReminder[]> {
 
   if (error || !data) return [];
 
-  // Sneller: één auth.users-call doen ipv per-row
+  // userId expliciet exposen — cron-handler heeft 'm nodig voor white-
+  // label branding lookup per reminder.
   return (data as Array<DbRow & { user_id: string }>).map((r) => ({
     ...rowToReminder(r),
+    userId: r.user_id,
     userEmail: r.email_address, // email-address staat al in de reminder zelf
   }));
 }
@@ -268,11 +272,24 @@ export async function checkAndAlertRegression(input: {
       return { alerted: false };
     }
 
+    // White-label: branding van audit-owner laden. Fallback bij fout.
+    let branding;
+    try {
+      branding = await getResolvedBrandingForUser(input.userId);
+    } catch {
+      branding = DEFAULT_RESOLVED_BRANDING;
+    }
+
     const subject = `Score-regressie: ${reminder.webshop_display_name} ${previousScore.toFixed(1)} → ${input.newScore.toFixed(1)}`;
     const html = `<!DOCTYPE html><html><body style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a;">
-<div style="background: linear-gradient(135deg, #dc2626, #f97316); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+<div style="background: linear-gradient(135deg, ${branding.primaryHex}, ${branding.secondaryHex}); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+  ${
+    branding.logoUrl
+      ? `<img src="${escapeHtmlMin(branding.logoUrl)}" alt="${escapeHtmlMin(branding.brandName)}" style="max-height:32px;max-width:140px;margin-bottom:12px;display:block;" />`
+      : ''
+  }
   <h1 style="margin: 0 0 8px 0; font-size: 20px;">⚠ Score-regressie gedetecteerd</h1>
-  <p style="margin: 0; opacity: 0.9; font-size: 14px;">${reminder.webshop_display_name}</p>
+  <p style="margin: 0; opacity: 0.9; font-size: 14px;">${escapeHtmlMin(reminder.webshop_display_name as string)}</p>
 </div>
 <div style="display: flex; gap: 12px; margin-bottom: 24px;">
   <div style="flex: 1; padding: 16px; background: #f8fafc; border-radius: 10px; text-align: center;">
@@ -285,19 +302,20 @@ export async function checkAndAlertRegression(input: {
     <div style="font-size: 12px; color: #dc2626; font-weight: 600; margin-top: 4px;">${delta.toFixed(1)}</div>
   </div>
 </div>
-<p style="line-height: 1.6; color: #334155;">Je laatste audit voor <strong>${reminder.webshop_display_name}</strong> liet een lagere score zien dan de vorige. Mogelijk is er iets veranderd op je site dat de gebruikerservaring beïnvloedt.</p>
+<p style="line-height: 1.6; color: #334155;">Je laatste audit voor <strong>${escapeHtmlMin(reminder.webshop_display_name as string)}</strong> liet een lagere score zien dan de vorige. Mogelijk is er iets veranderd op je site dat de gebruikerservaring beïnvloedt.</p>
 <p style="margin-top: 24px;">
-  <a href="https://${company.domain}" style="display: inline-block; background: #0f172a; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Bekijk audit in dashboard</a>
+  <a href="https://${company.domain}" style="display: inline-block; background: ${branding.primaryHex}; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Bekijk audit in dashboard</a>
 </p>
 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0 16px 0;">
 <p style="font-size: 11px; color: #94a3b8; line-height: 1.6;">
   Je krijgt deze melding omdat je regressie-alerts hebt aangezet voor deze webshop.
-  Beheer voorkeuren via je <a href="https://${company.domain}/account/schedules" style="color: #f97316;">reminder-instellingen</a>.
+  Beheer voorkeuren via je <a href="https://${company.domain}/account/schedules" style="color: ${branding.primaryHex};">reminder-instellingen</a>.
+  ${branding.isWhiteLabel ? `<br>Powered by <a href="https://${company.domain}" style="color:#94a3b8;">${escapeHtmlMin(company.tradeName)}</a>` : ''}
 </p>
 </body></html>`;
 
     await resend.emails.send({
-      from: `${company.tradeName} <noreply@${company.domain}>`,
+      from: `${branding.brandName} <noreply@${company.domain}>`,
       to: reminder.email_address as string,
       subject,
       html,
@@ -308,4 +326,17 @@ export async function checkAndAlertRegression(input: {
     console.error('[checkAndAlertRegression] failed:', e);
     return { alerted: false };
   }
+}
+
+/**
+ * Minimal HTML-escape helper voor regressie-alert template.
+ * Pure server-side, geen client exposure. Behoudt < > & " ' safe.
+ */
+function escapeHtmlMin(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

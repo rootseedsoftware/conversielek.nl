@@ -6,8 +6,10 @@
 
 import { headers } from 'next/headers';
 import { resendClient } from '@/lib/resend';
+import { createClient } from '@/lib/supabase/server';
 import { company } from '@/lib/data/company';
 import { renderAuditEmail } from '@/lib/email/audit-report';
+import { getResolvedBrandingForUser } from '@/lib/branding';
 import type { AuditResult } from '@/lib/claude';
 
 export type SendAuditInput = {
@@ -33,16 +35,28 @@ export async function sendAuditByEmail(input: SendAuditInput): Promise<{
   const proto = hdrs.get('x-forwarded-proto') ?? 'https';
   const reportUrl = `${proto}://${host}/account`;
 
+  // White-label: branding van caller ophalen. Bij uitgelogde flow OF
+  // user zonder branding → default Conversielek-stijl.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const branding = user ? await getResolvedBrandingForUser(user.id) : undefined;
+
   const { html, subject, text } = renderAuditEmail({
     webshopName: input.webshopName,
     audit: input.audit,
     reportUrl,
+    branding,
   });
 
   try {
     const resend = resendClient();
+    // Voor white-label: "From" toch op noreply@conversielek.nl (we hebben
+    // geen verified SMTP-domein voor agency-emails). Reply-To op email
+    // van de owner zou idealer zijn maar vereist gebruikers-input.
     const { error } = await resend.emails.send({
-      from: `${company.tradeName} <noreply@${company.domain}>`,
+      from: `${branding?.brandName ?? company.tradeName} <noreply@${company.domain}>`,
       to: input.to.trim(),
       subject,
       html,

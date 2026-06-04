@@ -16,27 +16,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { company } from '@/lib/data/company';
-import { getUserBranding, getLogoPublicUrl } from '@/lib/branding';
-import { applyBrandingDefaults } from '@/lib/branding-types';
-import type { BrandingSettings } from '@/lib/branding-types';
+import { getUserBranding, resolveBranding } from '@/lib/branding';
+import type { ResolvedBranding } from '@/lib/branding-types';
 import type { AuditResult } from '@/lib/claude';
 import type { FlowType } from '@/lib/data/flow-types';
 
-/**
- * Volledig "resolved" branding voor share-page render: kleuren genormaliseerd
- * naar #-prefix hex, logo-URL al opgelost, default-fallback toegepast. Null
- * = de creator heeft geen branding ingesteld → fallback naar Conversielek.
- */
-export type ResolvedBranding = {
-  primaryHex: string;
-  secondaryHex: string;
-  brandName: string;
-  logoUrl: string | null;
-  footerText: string | null;
-  /** True als er échte agency-branding actief is (ipv default). Toggle de
-   *  "Powered by Conversielek"-credit in de share-page. */
-  isWhiteLabel: boolean;
-};
+// LET OP: ResolvedBranding type wordt NIET re-exported uit 'use server'
+// files — share-page importeert direct uit @/lib/branding-types.
 
 export type AuditShare = {
   token: string;
@@ -66,48 +52,9 @@ export type SharedAuditPayload = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// Branding-resolution
+// Branding-resolution — verplaatst naar /lib/branding.ts voor hergebruik
+// in email-templates. resolveBranding wordt geïmporteerd bovenin.
 // ─────────────────────────────────────────────────────────────────────────
-
-const DEFAULT_BRANDING: ResolvedBranding = {
-  primaryHex: '#f97316',
-  secondaryHex: '#dc2626',
-  brandName: company.tradeName,
-  logoUrl: null,
-  footerText: null,
-  isWhiteLabel: false,
-};
-
-/**
- * Resolveert de raw BrandingSettings van een audit-eigenaar naar een
- * volledig render-klaar object. Lege/null branding → default Conversielek.
- *
- * isWhiteLabel-detectie: een gebruiker telt als "white-label actief" als
- * hij minstens één van logo, brandName of footerText heeft ingevuld. Pure
- * kleur-aanpassingen (zonder andere customizations) blijven Conversielek-
- * branded (kleur is geen volledige white-label).
- */
-async function resolveBranding(
-  raw: BrandingSettings | null
-): Promise<ResolvedBranding> {
-  if (!raw) return DEFAULT_BRANDING;
-
-  const filled = applyBrandingDefaults(raw);
-  const logoUrl = filled.logoPath ? await getLogoPublicUrl(filled.logoPath) : null;
-  const hasLogo = !!logoUrl;
-  const hasBrandName = !!filled.brandName?.trim();
-  const hasFooterText = !!filled.footerText?.trim();
-  const isWhiteLabel = hasLogo || hasBrandName || hasFooterText;
-
-  return {
-    primaryHex: `#${filled.primaryColor ?? 'f97316'}`,
-    secondaryHex: `#${filled.secondaryColor ?? 'dc2626'}`,
-    brandName: filled.brandName?.trim() || company.tradeName,
-    logoUrl,
-    footerText: filled.footerText?.trim() || null,
-    isWhiteLabel,
-  };
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // AUTHENTICATED — eigen shares beheren

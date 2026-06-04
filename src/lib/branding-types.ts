@@ -3,6 +3,12 @@
 // Client en server gebruiken dezelfde shape. Kleur-waarden zijn altijd
 // 6-char hex zonder hash (bv. "f97316") zodat we 'm in template literals
 // kunnen prefixen met # naar believen.
+//
+// ResolvedBranding (render-klaar) staat hier OOK omdat email-templates
+// 'm willen importeren — /lib/branding.ts is een 'use server' file en
+// kan in Next 16+ alleen async functions exporteren.
+
+import { company } from '@/lib/data/company';
 
 export type BrandingSettings = {
   /** Primaire kleur als 6-char hex zonder hash (bv. "f97316"). Null = default oranje. */
@@ -45,3 +51,33 @@ export function applyBrandingDefaults(b: BrandingSettings | null): BrandingSetti
     footerText: b.footerText,
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Render-klare branding (gedeeld door PDF, share-page, email-templates)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Volledig "resolved" branding voor rendering. Kleuren met # prefix,
+ * logo-URL al opgelost via Supabase Storage. isWhiteLabel-flag bepaalt
+ * of we een "Powered by Conversielek"-credit tonen.
+ *
+ * isWhiteLabel-regel: true zodra user minstens één van logo, brandName
+ * of footerText heeft ingevuld. Pure kleur-overrides tellen niet.
+ */
+export type ResolvedBranding = {
+  primaryHex: string;
+  secondaryHex: string;
+  brandName: string;
+  logoUrl: string | null;
+  footerText: string | null;
+  isWhiteLabel: boolean;
+};
+
+export const DEFAULT_RESOLVED_BRANDING: ResolvedBranding = {
+  primaryHex: '#f97316',
+  secondaryHex: '#dc2626',
+  brandName: company.tradeName,
+  logoUrl: null,
+  footerText: null,
+  isWhiteLabel: false,
+};

@@ -3,8 +3,14 @@
 // hoeven. Alle dynamische content gaat door escapeHtml zodat AI-output
 // of user-input geen invalid HTML kan veroorzaken (zelfde XSS-safety
 // als de PDF-export).
+//
+// White-label ondersteuning: branding-param laat agency hun eigen kleuren,
+// brand-naam en footer-tekst gebruiken in plaats van Conversielek-default.
+// isWhiteLabel-flag bepaalt of we een "Powered by"-credit tonen.
 
 import type { AuditResult } from '@/lib/claude';
+import { DEFAULT_RESOLVED_BRANDING, type ResolvedBranding } from '@/lib/branding-types';
+import { company } from '@/lib/data/company';
 
 function escapeHtml(input: unknown): string {
   if (input === null || input === undefined) return '';
@@ -35,13 +41,18 @@ export type AuditEmailInput = {
   audit: AuditResult;
   /** Volledige URL waar de user 't rapport op de site kan openen */
   reportUrl: string;
+  /** Optioneel — branding van audit-eigenaar voor white-label rendering */
+  branding?: ResolvedBranding;
 };
 
 export function renderAuditEmail({
   webshopName,
   audit,
   reportUrl,
+  branding = DEFAULT_RESOLVED_BRANDING,
 }: AuditEmailInput): { html: string; subject: string; text: string } {
+  // Score-kleur blijft semantisch (groen=goed/rood=slecht), brand-kleur
+  // wordt apart gebruikt voor header + CTA.
   const scoreColor =
     audit.overall_score >= 7
       ? '#10b981'
@@ -51,6 +62,7 @@ export function renderAuditEmail({
 
   const topIssues = audit.issues.slice(0, 3);
   const safeName = escapeHtml(webshopName || 'jouw webshop');
+  const safeBrandName = escapeHtml(branding.brandName);
 
   const subject = `UX-audit voor ${webshopName || 'jouw webshop'} — score ${audit.overall_score}/10`;
 
@@ -65,9 +77,14 @@ export function renderAuditEmail({
 <div style="max-width:600px;margin:0 auto;padding:32px 16px;">
   <div style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
 
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#f97316 0%,#dc2626 100%);padding:32px 24px;text-align:center;">
-      <h1 style="color:white;margin:0 0 4px 0;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Conversielek</h1>
+    <!-- Header met dynamische branding -->
+    <div style="background:linear-gradient(135deg,${branding.primaryHex} 0%,${branding.secondaryHex} 100%);padding:32px 24px;text-align:center;">
+      ${
+        branding.logoUrl
+          ? `<img src="${escapeHtml(branding.logoUrl)}" alt="${safeBrandName}" style="max-height:48px;max-width:200px;margin:0 auto 12px;display:block;background:white;border-radius:8px;padding:4px;" />`
+          : ''
+      }
+      <h1 style="color:white;margin:0 0 4px 0;font-size:22px;font-weight:700;letter-spacing:-0.01em;">${safeBrandName}</h1>
       <p style="color:rgba(255,255,255,0.95);margin:0;font-size:14px;">UX-audit voor ${safeName}</p>
     </div>
 
@@ -133,9 +150,9 @@ export function renderAuditEmail({
         : ''
     }
 
-    <!-- CTA -->
+    <!-- CTA met brand-gradient -->
     <div style="padding:24px;text-align:center;border-top:1px solid #e2e8f0;background:#f8fafc;">
-      <a href="${escapeHtml(reportUrl)}" style="display:inline-block;background:#0f172a;color:white;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:500;font-size:14px;">
+      <a href="${escapeHtml(reportUrl)}" style="display:inline-block;background:linear-gradient(135deg,${branding.primaryHex},${branding.secondaryHex});color:white;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px;">
         Volledig rapport bekijken
       </a>
       <p style="font-size:12px;color:#64748b;margin:12px 0 0 0;">
@@ -143,18 +160,37 @@ export function renderAuditEmail({
       </p>
     </div>
 
+    ${
+      branding.isWhiteLabel && branding.footerText
+        ? `
+    <!-- Custom footer-tekst voor white-label -->
+    <div style="padding:20px 24px;background:${branding.primaryHex}10;border-top:1px solid #e2e8f0;text-align:center;">
+      <p style="font-size:13px;color:${branding.primaryHex};margin:0 0 6px 0;font-weight:600;">${safeBrandName}</p>
+      <p style="font-size:12px;color:#64748b;margin:0;line-height:1.5;white-space:pre-line;">${escapeHtml(branding.footerText)}</p>
+    </div>`
+        : ''
+    }
+
   </div>
 
+  ${
+    branding.isWhiteLabel
+      ? `
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px;line-height:1.6;">
+    Powered by <a href="${escapeHtml(company.url)}" style="color:#94a3b8;text-decoration:underline;">${escapeHtml(company.tradeName)}</a>
+  </p>`
+      : `
   <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:20px;line-height:1.6;">
-    Je krijgt deze mail omdat je een UX-audit hebt aangevraagd op Conversielek.nl<br>
-    <a href="https://conversielek.nl" style="color:#94a3b8;text-decoration:underline;">conversielek.nl</a>
-  </p>
+    Je krijgt deze mail omdat je een UX-audit hebt aangevraagd op ${escapeHtml(company.domain)}<br>
+    <a href="${escapeHtml(company.url)}" style="color:#94a3b8;text-decoration:underline;">${escapeHtml(company.domain)}</a>
+  </p>`
+  }
 </div>
 </body>
 </html>`;
 
   // Plain-text versie voor spam-filters + mail-clients zonder HTML
-  const text = `Conversielek — UX-audit voor ${webshopName || 'jouw webshop'}
+  const text = `${branding.brandName} — UX-audit voor ${webshopName || 'jouw webshop'}
 
 Score: ${audit.overall_score}/10
 
@@ -165,7 +201,7 @@ ${topIssues.map((issue, i) => `${i + 1}. ${issue.title} [${severityLabels[issue.
 
 ${audit.quick_wins && audit.quick_wins.length > 0 ? `QUICK WINS:\n${audit.quick_wins.slice(0, 3).map((w) => `• ${w}`).join('\n')}\n\n` : ''}Volledig rapport: ${reportUrl}
 
-— Conversielek.nl`;
+${branding.isWhiteLabel ? `${branding.footerText ?? ''}\n\nPowered by ${company.tradeName} · ${company.url}` : `— ${company.tradeName}.nl`}`;
 
   return { html, subject, text };
 }

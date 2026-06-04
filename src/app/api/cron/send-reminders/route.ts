@@ -14,6 +14,8 @@
 import { NextRequest } from 'next/server';
 import { listDueReminders, markReminderSent } from '@/lib/audit-reminders';
 import { resendClient } from '@/lib/resend';
+import { getResolvedBrandingForUser } from '@/lib/branding';
+import { DEFAULT_RESOLVED_BRANDING, type ResolvedBranding } from '@/lib/branding-types';
 import { company } from '@/lib/data/company';
 
 export const runtime = 'nodejs';
@@ -59,15 +61,25 @@ export async function GET(req: NextRequest) {
 
   for (const reminder of dueList) {
     try {
+      // Per reminder branding laden (extra DB-call OK voor MVP-volume).
+      // Fallback naar default-Conversielek bij fout of geen branding.
+      let branding: ResolvedBranding;
+      try {
+        branding = await getResolvedBrandingForUser(reminder.userId);
+      } catch {
+        branding = DEFAULT_RESOLVED_BRANDING;
+      }
+
       const subject = `Tijd voor een nieuwe audit van ${reminder.webshopDisplayName}`;
       const html = buildReminderEmail({
         webshopName: reminder.webshopDisplayName,
         webshopUrl: reminder.webshopUrl,
         intervalDays: reminder.intervalDays,
+        branding,
       });
 
       await resend.emails.send({
-        from: `${company.tradeName} <noreply@${company.domain}>`,
+        from: `${branding.brandName} <noreply@${company.domain}>`,
         to: reminder.emailAddress,
         subject,
         html,
@@ -98,10 +110,12 @@ function buildReminderEmail({
   webshopName,
   webshopUrl,
   intervalDays,
+  branding,
 }: {
   webshopName: string;
   webshopUrl: string | null;
   intervalDays: number;
+  branding: ResolvedBranding;
 }): string {
   const ctaUrl = `https://${company.domain}/?view=audit`;
   return `<!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a; background: #f8fafc;">
@@ -109,7 +123,12 @@ function buildReminderEmail({
 <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 14px rgba(15,23,42,0.08);">
 
   <div style="text-align: center; margin-bottom: 24px;">
-    <div style="display: inline-block; padding: 8px 16px; background: #fff7ed; color: #c2410c; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+    ${
+      branding.logoUrl
+        ? `<img src="${escapeHtml(branding.logoUrl)}" alt="${escapeHtml(branding.brandName)}" style="max-height:40px;max-width:160px;margin:0 auto 12px;display:block;" />`
+        : ''
+    }
+    <div style="display: inline-block; padding: 8px 16px; background: ${branding.primaryHex}15; color: ${branding.primaryHex}; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
       ${intervalDays}-daagse reminder
     </div>
   </div>
@@ -124,7 +143,7 @@ function buildReminderEmail({
   </p>
 
   <div style="text-align: center; margin: 32px 0;">
-    <a href="${ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #f97316, #dc2626); color: white; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 4px 14px rgba(249,115,22,0.3);">
+    <a href="${ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, ${branding.primaryHex}, ${branding.secondaryHex}); color: white; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px;">
       Start audit nu →
     </a>
   </div>
@@ -146,9 +165,12 @@ function buildReminderEmail({
 
 <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #94a3b8; line-height: 1.6;">
   Wil je geen reminders meer?
-  <a href="https://${company.domain}/account/schedules" style="color: #f97316;">Beheer voorkeuren</a>
-  ·
-  <a href="https://${company.domain}" style="color: #f97316;">${company.tradeName}</a>
+  <a href="https://${company.domain}/account/schedules" style="color: ${branding.primaryHex};">Beheer voorkeuren</a>
+  ${
+    branding.isWhiteLabel
+      ? `<br><span style="color:#cbd5e1;">Powered by <a href="https://${company.domain}" style="color:#94a3b8;">${escapeHtml(company.tradeName)}</a></span>`
+      : `· <a href="https://${company.domain}" style="color: ${branding.primaryHex};">${escapeHtml(company.tradeName)}</a>`
+  }
 </div>
 
 </body></html>`;
