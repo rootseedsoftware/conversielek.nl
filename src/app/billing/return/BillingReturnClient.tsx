@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { syncMyPendingSubscription } from '@/lib/billing-actions';
+import { company } from '@/lib/data/company';
 
 type Stage =
   | 'waiting' // initial 3-sec wait
@@ -175,7 +176,7 @@ export default function BillingReturnClient() {
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-8">
             Nog problemen?{' '}
             <a
-              href="mailto:rootseedsoftware@gmail.com?subject=Activatie+lukt+niet"
+              href={`mailto:${company.email.support}?subject=Activatie+lukt+niet`}
               className="underline hover:text-slate-600 dark:hover:text-slate-400"
             >
               Stuur ons een mail

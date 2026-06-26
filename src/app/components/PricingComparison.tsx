@@ -18,6 +18,7 @@
 
 import { Fragment } from 'react';
 import { Check, X, Star } from 'lucide-react';
+import { company } from '@/lib/data/company';
 
 type Cell = boolean | string | { value: string; highlight?: true };
 
@@ -298,10 +299,10 @@ export default function PricingComparison() {
       <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
         Mis je een feature? Mail{' '}
         <a
-          href="mailto:rootseedsoftware@gmail.com?subject=Feature-verzoek"
+          href={`mailto:${company.email.general}?subject=Feature-verzoek`}
           className="underline hover:text-orange-600 dark:hover:text-orange-400"
         >
-          rootseedsoftware@gmail.com
+          {company.email.general}
         </a>{' '}
         — we plannen op basis van vraag.
       </p>

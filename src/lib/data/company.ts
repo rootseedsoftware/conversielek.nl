@@ -24,16 +24,16 @@ export const company = {
     country: 'Nederland',
   },
 
-  // Contact — alles loopt voorlopig naar het gmail-adres tot we
-  // info@/support@/privacy@/legal@ aliases bij Hostnet hebben opgezet.
+  // Contact — alles loopt voorlopig naar info@trofsof.com tot we
+  // support@/privacy@/legal@ aliases op trofsof.com hebben opgezet.
   // De aparte keys blijven bestaan zodat we per use-case kunnen
   // splitsen zodra de aliases er zijn, zonder de juridische pagina's
   // opnieuw te hoeven aanraken.
   email: {
-    general: 'rootseedsoftware@gmail.com',
-    support: 'rootseedsoftware@gmail.com',
-    privacy: 'rootseedsoftware@gmail.com',
-    legal: 'rootseedsoftware@gmail.com',
+    general: 'info@trofsof.com',
+    support: 'info@trofsof.com',
+    privacy: 'info@trofsof.com',
+    legal: 'info@trofsof.com',
   },
 
   // Datum van laatste juridische update — handmatig bumpen bij wijzigingen
