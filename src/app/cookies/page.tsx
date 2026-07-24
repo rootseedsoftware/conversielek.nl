@@ -44,10 +44,10 @@ const cookies: CookieRow[] = [
     partij: 'Conversielek',
   },
   {
-    name: 'cl_cookie_consent',
+    name: 'conversielek:cookie-consent (localStorage)',
     type: 'functioneel',
-    doel: 'Onthoudt je keuze in de cookie-banner, zodat we die niet bij elk bezoek opnieuw tonen.',
-    retentie: '1 jaar',
+    doel: 'Onthoudt je keuze in de cookie-banner, zodat we die niet bij elk bezoek opnieuw tonen. Wordt in browser-localStorage bewaard, niet als cookie.',
+    retentie: 'Tot je browser-data wist',
     partij: 'Conversielek',
   },
 ];
