@@ -84,8 +84,10 @@ import BenchmarkView from '@/app/components/BenchmarkView';
 import IssueCollaboration from '@/app/components/IssueCollaboration';
 import {
   listAuditCollaboration,
+  listAssignableMembers,
   type CollaborationSnapshot,
   type IssueStatus,
+  type AssignableMember,
 } from '@/lib/issue-collaboration';
 import type { ExportContext } from '@/lib/issue-export';
 import EmptyState, { IllustrationAudit } from '@/app/components/EmptyState';
@@ -172,6 +174,7 @@ export default function App() {
   // naar report-view (via useEffect). Per issue-index zit hier status +
   // comments.
   const [collab, setCollab] = useState<CollaborationSnapshot>({ states: [], comments: [] });
+  const [assignableMembers, setAssignableMembers] = useState<AssignableMember[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -203,8 +206,12 @@ export default function App() {
         } = await supabase.auth.getUser();
         setCurrentUserId(user?.id ?? null);
         if (user) {
-          const snap = await listAuditCollaboration(currentAuditKey);
+          const [snap, members] = await Promise.all([
+            listAuditCollaboration(currentAuditKey),
+            listAssignableMembers(currentAuditKey),
+          ]);
           setCollab(snap);
+          setAssignableMembers(members);
         }
       } catch {
         /* fail-silent — collab is optioneel */
@@ -2615,8 +2622,12 @@ export default function App() {
                             initialStatus={
                               collab.states.find((s) => s.issueIndex === issue.originalIndex)?.status as IssueStatus | undefined
                             }
+                            initialAssignee={
+                              collab.states.find((s) => s.issueIndex === issue.originalIndex)?.assignedTo ?? null
+                            }
                             initialComments={collab.comments.filter((c) => c.issueIndex === issue.originalIndex)}
                             currentUserId={currentUserId}
+                            assignableMembers={assignableMembers}
                           />
                         )}
                       </div>
