@@ -43,6 +43,11 @@ type DiagnoseResult = {
   };
   profileCheck?: {
     ok: boolean;
+    /** 'org-token' → normale OAuth-response; 'profile-key' → 403 want de
+     *  key is scoped naar één profiel, niet naar de hele organisatie.
+     *  Dat laatste is compleet OK voor payments — alleen de organizations
+     *  endpoint werkt er niet mee. */
+    keyType?: 'org-token' | 'profile-key' | 'unknown';
     error?: string;
     details?: {
       name: string;
@@ -141,13 +146,17 @@ export async function GET() {
   };
 
   // Probeer organisations.getCurrent — onthult of de key gekoppeld is aan
-  // een gevalideerd profiel/account (Mollie schorst betalingen als de
-  // organisatie nog in review staat)
+  // een gevalideerd profiel/account. Twee mogelijke uitkomsten:
+  //   1. Werkt → OAuth-token of unrestricted API-key. Toont org-details.
+  //   2. HTTP 403 "restricted to a specific profile" → normale profile-
+  //      scoped API-key. Payments werken prima; alleen deze specifieke
+  //      endpoint niet beschikbaar. Ok=true met keyType=profile-key.
   try {
     const mollie = mollieClient();
     const org = await mollie.organizations.getCurrent();
     result.profileCheck = {
       ok: true,
+      keyType: 'org-token',
       details: {
         name: org.name,
         registrationNumber: org.registrationNumber ?? null,
@@ -157,10 +166,22 @@ export async function GET() {
     };
   } catch (e) {
     const err = e as { message?: string; statusCode?: number };
-    result.profileCheck = {
-      ok: false,
-      error: `${err.message ?? 'onbekend'} ${err.statusCode ? `[HTTP ${err.statusCode}]` : ''}`,
-    };
+    const isProfileScopedKey =
+      err.statusCode === 403 &&
+      (err.message ?? '').toLowerCase().includes('restricted to a specific profile');
+    if (isProfileScopedKey) {
+      // Verwacht bij een profile-scoped API-key. Niet blocking.
+      result.profileCheck = {
+        ok: true,
+        keyType: 'profile-key',
+      };
+    } else {
+      result.profileCheck = {
+        ok: false,
+        keyType: 'unknown',
+        error: `${err.message ?? 'onbekend'} ${err.statusCode ? `[HTTP ${err.statusCode}]` : ''}`,
+      };
+    }
   }
 
   return Response.json(result);
