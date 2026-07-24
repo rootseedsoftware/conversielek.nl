@@ -7,11 +7,16 @@ import { ShoppingCart, AlertCircle } from 'lucide-react';
 import { signIn } from '@/app/auth/actions';
 
 type Props = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: Props) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
+  // Alleen relatieve paden accepteren — voorkomt open-redirect
+  const safeNextValue =
+    next && next.startsWith('/') && !next.startsWith('//') && !next.includes('\\')
+      ? next
+      : '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50/30 flex flex-col">
@@ -32,7 +37,10 @@ export default async function LoginPage({ searchParams }: Props) {
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Inloggen</h1>
             <p className="text-slate-600 dark:text-slate-400 text-sm">
               Nog geen account?{' '}
-              <Link href="/signup" className="text-orange-600 hover:text-orange-700 font-medium">
+              <Link
+                href={safeNextValue ? `/signup?next=${encodeURIComponent(safeNextValue)}` : '/signup'}
+                className="text-orange-600 hover:text-orange-700 font-medium"
+              >
                 Maak er een aan
               </Link>
             </p>
@@ -47,6 +55,7 @@ export default async function LoginPage({ searchParams }: Props) {
             )}
 
             <form action={signIn} className="space-y-4">
+              {safeNextValue && <input type="hidden" name="next" value={safeNextValue} />}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   E-mail

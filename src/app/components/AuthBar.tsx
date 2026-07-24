@@ -7,8 +7,10 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin-auth';
+import { getUserWorkspaces, getCurrentWorkspace } from '@/lib/workspace-server';
 import UserMenu from './UserMenu';
 import ThemeToggle from './ThemeToggle';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 
 export default async function AuthBar() {
   // Defensive: als Supabase env vars ontbreken, render alleen de "uit"-state
@@ -29,9 +31,17 @@ export default async function AuthBar() {
   // Admin-flag server-side bepalen — niet onthullen aan client als false
   const showAdminLink = user?.email ? await isAdmin() : false;
 
+  // Workspaces alleen laden voor ingelogde users (anonymous heeft er geen)
+  const [workspaces, currentWs] = user
+    ? await Promise.all([getUserWorkspaces(), getCurrentWorkspace()])
+    : [[], null];
+
   return (
     <div className="border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur transition-colors">
       <div className="max-w-6xl mx-auto px-6 h-11 flex items-center justify-end gap-3">
+        {user?.email && workspaces.length > 1 && (
+          <WorkspaceSwitcher workspaces={workspaces} currentId={currentWs?.id ?? null} />
+        )}
         <ThemeToggle size="sm" />
         {user?.email ? (
           <UserMenu email={user.email} showAdminLink={showAdminLink} />

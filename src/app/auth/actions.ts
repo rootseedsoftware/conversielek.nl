@@ -15,12 +15,28 @@ function errorParam(message: string): string {
   return `?error=${encodeURIComponent(message)}`;
 }
 
+/**
+ * Safe-redirect helper: alleen relatieve URLs binnen onze app accepteren.
+ * Voorkomt open-redirect via ?next=https://evil.com.
+ */
+function safeNext(next: string | null | undefined, fallback = '/'): string {
+  if (!next) return fallback;
+  // Moet met "/" beginnen én niet "//"" (protocol-relative) én geen "\\"
+  if (!next.startsWith('/') || next.startsWith('//') || next.includes('\\')) {
+    return fallback;
+  }
+  return next;
+}
+
 export async function signIn(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
+  const next = safeNext(String(formData.get('next') ?? '') || null);
+
+  const errorSuffix = next !== '/' ? `&next=${encodeURIComponent(next)}` : '';
 
   if (!email || !password) {
-    redirect('/login' + errorParam('Vul e-mail en wachtwoord in.'));
+    redirect('/login' + errorParam('Vul e-mail en wachtwoord in.') + errorSuffix);
   }
 
   const supabase = await createClient();
@@ -34,22 +50,25 @@ export async function signIn(formData: FormData) {
         : error.message === 'Email not confirmed'
         ? 'Bevestig eerst je e-mail via de link in je inbox.'
         : `Inloggen mislukt: ${error.message}`;
-    redirect('/login' + errorParam(msg));
+    redirect('/login' + errorParam(msg) + errorSuffix);
   }
 
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect(next);
 }
 
 export async function signUp(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
+  const next = safeNext(String(formData.get('next') ?? '') || null);
+
+  const errorSuffix = next !== '/' ? `&next=${encodeURIComponent(next)}` : '';
 
   if (!email || !password) {
-    redirect('/signup' + errorParam('Vul e-mail en wachtwoord in.'));
+    redirect('/signup' + errorParam('Vul e-mail en wachtwoord in.') + errorSuffix);
   }
   if (password.length < 8) {
-    redirect('/signup' + errorParam('Wachtwoord moet minimaal 8 karakters zijn.'));
+    redirect('/signup' + errorParam('Wachtwoord moet minimaal 8 karakters zijn.') + errorSuffix);
   }
 
   const supabase = await createClient();
@@ -60,11 +79,11 @@ export async function signUp(formData: FormData) {
       error.message.includes('already registered')
         ? 'Dit e-mailadres heeft al een account. Log in.'
         : `Aanmelden mislukt: ${error.message}`;
-    redirect('/signup' + errorParam(msg));
+    redirect('/signup' + errorParam(msg) + errorSuffix);
   }
 
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect(next);
 }
 
 export async function signOut() {

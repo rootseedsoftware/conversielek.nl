@@ -5,11 +5,15 @@ import { ShoppingCart, AlertCircle } from 'lucide-react';
 import { signUp } from '@/app/auth/actions';
 
 type Props = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; email?: string }>;
 };
 
 export default async function SignupPage({ searchParams }: Props) {
-  const { error } = await searchParams;
+  const { error, next, email: prefillEmail } = await searchParams;
+  const safeNextValue =
+    next && next.startsWith('/') && !next.startsWith('//') && !next.includes('\\')
+      ? next
+      : '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50/30 flex flex-col">
@@ -30,7 +34,10 @@ export default async function SignupPage({ searchParams }: Props) {
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Account aanmaken</h1>
             <p className="text-slate-600 dark:text-slate-400 text-sm">
               Al een account?{' '}
-              <Link href="/login" className="text-orange-600 hover:text-orange-700 font-medium">
+              <Link
+                href={safeNextValue ? `/login?next=${encodeURIComponent(safeNextValue)}` : '/login'}
+                className="text-orange-600 hover:text-orange-700 font-medium"
+              >
                 Log hier in
               </Link>
             </p>
@@ -45,6 +52,7 @@ export default async function SignupPage({ searchParams }: Props) {
             )}
 
             <form action={signUp} className="space-y-4">
+              {safeNextValue && <input type="hidden" name="next" value={safeNextValue} />}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   E-mail
@@ -55,6 +63,7 @@ export default async function SignupPage({ searchParams }: Props) {
                   type="email"
                   required
                   autoComplete="email"
+                  defaultValue={prefillEmail ?? ''}
                   placeholder="jouw@email.nl"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none transition text-sm"
                 />
