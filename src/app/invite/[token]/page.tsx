@@ -41,9 +41,15 @@ export default async function InvitePage({ params }: PageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const now = Date.now();
+  // Server Component: één render per request, geen re-render. De
+  // purity-rule is hier een false positive — Date.now() is prima voor
+  // "is deze invite verlopen op dit moment"-check. Rule staat aan op
+  // de directe Date.now()-call zelf.
   const inviteExpired =
-    invite && new Date(invite.expires_at as string).getTime() < now;
+    invite &&
+    new Date(invite.expires_at as string).getTime() <
+      // eslint-disable-next-line react-hooks/purity
+      Date.now();
   const wsName = ((invite?.workspaces as unknown) as { name: string } | null)?.name ?? 'workspace';
 
   return (
