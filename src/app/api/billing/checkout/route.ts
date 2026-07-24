@@ -17,7 +17,7 @@ import { NextRequest } from 'next/server';
 import { SequenceType } from '@mollie/api-client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { mollieClient } from '@/lib/mollie/client';
+import { mollieClient, getMollieApiKey } from '@/lib/mollie/client';
 import { getPlanBySlug } from '@/lib/billing';
 
 export const runtime = 'nodejs';
@@ -122,9 +122,14 @@ export async function POST(req: NextRequest) {
   //
   // Workaround: bij test-key → sequenceType:oneoff zodat we de hele flow
   // eind-to-end kunnen testen. Geen recurring mandate; webhook activeert
-  // de subscription voor 1 maand. Bij live-key (test_ → live_ na KvK-
-  // verificatie) gaat alles automatisch terug naar first+recurring.
-  const isTestMode = (process.env.MOLLIE_API_KEY ?? '').startsWith('test_');
+  // de subscription voor 1 maand. Bij live-key gaat alles automatisch
+  // terug naar first+recurring.
+  //
+  // Gebruikt getMollieApiKey() ipv rauwe env-var zodat MOLLIE_API_KEY_LIVE
+  // (productie) en MOLLIE_API_KEY (dev/preview fallback) allebei correct
+  // gedetecteerd worden.
+  const activeKey = getMollieApiKey() ?? '';
+  const isTestMode = activeKey.startsWith('test_');
   const sequenceType = isTestMode ? SequenceType.oneoff : SequenceType.first;
 
   let payment;

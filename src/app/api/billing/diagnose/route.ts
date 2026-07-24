@@ -12,7 +12,7 @@
 
 import { SequenceType, Locale, type Method } from '@mollie/api-client';
 import { requireAdmin } from '@/lib/admin-auth';
-import { mollieClient } from '@/lib/mollie/client';
+import { mollieClient, getMollieApiKey } from '@/lib/mollie/client';
 
 export const runtime = 'nodejs';
 export const maxDuration = 15;
@@ -22,6 +22,10 @@ type DiagnoseResult = {
     present: boolean;
     mode: 'test' | 'live' | 'unknown';
     prefix: string; // bv. "test_..." — eerste 6 chars + ... voor identificatie zonder lek
+    /** Uit welke env-var kwam de actieve key. Handig om te zien of live-var
+     *  daadwerkelijk geladen is, of dat we per ongeluk terugvallen op de
+     *  open dev-var. */
+    source: 'MOLLIE_API_KEY_LIVE' | 'MOLLIE_API_KEY' | 'none';
   };
   methods?: {
     count: number;
@@ -52,7 +56,12 @@ type DiagnoseResult = {
 export async function GET() {
   await requireAdmin();
 
-  const rawKey = process.env.MOLLIE_API_KEY ?? '';
+  const rawKey = getMollieApiKey() ?? '';
+  const source: DiagnoseResult['apiKey']['source'] = process.env.MOLLIE_API_KEY_LIVE
+    ? 'MOLLIE_API_KEY_LIVE'
+    : process.env.MOLLIE_API_KEY
+      ? 'MOLLIE_API_KEY'
+      : 'none';
   const result: DiagnoseResult = {
     apiKey: {
       present: rawKey.length > 0,
@@ -62,6 +71,7 @@ export async function GET() {
           ? 'live'
           : 'unknown',
       prefix: rawKey ? rawKey.slice(0, 6) + '…' : '(leeg)',
+      source,
     },
   };
 
